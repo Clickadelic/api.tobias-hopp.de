@@ -6,23 +6,27 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreHyperlinkRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        // Auth ist bereits durch auth:sanctum abgesichert
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'title'       => ['required', 'string', 'max:255'],
+            'url'         => ['required', 'url', 'max:2048'],
+            'description' => ['nullable', 'string'],
+            'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
+            'is_public'   => ['sometimes', 'boolean'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'url.url' => 'Die angegebene URL ist ungültig.',
         ];
     }
 }

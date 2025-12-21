@@ -2,23 +2,24 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\User;
+use App\Models\Category;
+use App\Models\Hyperlink;
+use App\Policies\UserPolicy;
+use App\Policies\CategoryPolicy;
+use App\Policies\HyperlinkPolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    protected $policies = [
+        User::class      => UserPolicy::class,
+        Category::class  => CategoryPolicy::class,
+        Hyperlink::class => HyperlinkPolicy::class,
+    ];
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
     }
 }

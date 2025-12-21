@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hyperlink', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->string('description');
-            $table->string('url');
-            $table->enum('target', ['_self','_blank','_parent','_top'])->default('_blank');
-            $table->uuid('user_id');
-            $table->uuid('category_id')->nullable();
+            $table->string('slug')->unique();
+            $table->string('type'); // z. B. "hyperlink"
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hyperlink');
+        Schema::dropIfExists('category');
     }
 };
