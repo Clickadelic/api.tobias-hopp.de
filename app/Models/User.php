@@ -52,6 +52,19 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Override Sanctum token model
+     */
+    public function createToken(string $name, array $abilities = ['*'])
+    {
+        return $this->tokens()->createToken($name, $abilities, PersonalAccessToken::class);
+    }
+
+    public function tokens()
+    {
+        return $this->morphMany(PersonalAccessToken::class, 'tokenable');
+    }
+
     protected function hyperlink()
     {
         return $this->hasMany(Hyperlink::class);
