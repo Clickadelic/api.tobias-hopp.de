@@ -5,7 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "dev-all": "\"concurrently php artisan serve\""
+        "dev-all": "concurrently \"php artisan serve\" \"npm run dev\"",
+        "reset-and-migrate": "php artisan migrate:fresh --seed"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

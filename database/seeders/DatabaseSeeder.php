@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Clickadelic',
             'email' => 'click@clickadelic.de',
             'email_verified_at' => now(),
-            'password' => Hash::make("forell0204$"), // temporäres Passwort
+            'password' => Hash::make("forello204$"), // temporäres Passwort
             'remember_token' => Str::random(10),
         ]);
     }
