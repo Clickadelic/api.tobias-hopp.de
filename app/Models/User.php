@@ -14,7 +14,6 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasUuids;
 
-    // Fix user model
     protected $keyType = 'string';
     public $incrementing = false;
 
@@ -50,19 +49,6 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    /**
-     * Override Sanctum token model
-     */
-    public function createToken(string $name, array $abilities = ['*'])
-    {
-        return $this->tokens()->createToken($name, $abilities, PersonalAccessToken::class);
-    }
-
-    public function tokens()
-    {
-        return $this->morphMany(PersonalAccessToken::class, 'tokenable');
     }
 
     protected function hyperlink()

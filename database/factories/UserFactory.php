@@ -28,7 +28,7 @@ class UserFactory extends Factory
             'name' => 'Clickadelic',
             'email' => 'click@clicadelic',
             'email_verified_at' => now(),
-            'password' => bcrypt('forell0204$'),
+            'password' => hash::make('forell0204$'),
             'remember_token' => Str::random(10),
         ];
     }

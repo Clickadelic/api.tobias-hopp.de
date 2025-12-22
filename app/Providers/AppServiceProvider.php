@@ -9,6 +9,8 @@ use App\Policies\UserPolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\HyperlinkPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Laravel\Sanctum\Sanctum;
+use App\Models\PersonalAccessToken;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,5 +23,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+
+        // Use our UUID-based token model
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }
 }

@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
         User::create([
             'id' => Str::uuid(),
             'name' => 'Clickadelic',
-            'email' => 'click@clicadelic',
+            'email' => 'click@clickadelic.de',
             'email_verified_at' => now(),
-            'password' => Hash::make('forell0204$'), // temporäres Passwort
+            'password' => Hash::make("forell0204$"), // temporäres Passwort
             'remember_token' => Str::random(10),
         ]);
     }
