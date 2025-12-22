@@ -17,8 +17,8 @@
         @endif
     </head>
     <body class="min-h-dvh flex flex-col items-center jusitfy-between bg-gray-200" id="wave-body">
-        <div class="w-full bg-white shadow-md">
-            <header class="container mx-auto flex items-center justify-between p-4">
+        <div class="w-full bg-white/30 backdrop backdrop-blur shadow-md">
+            <header class="container mx-auto flex items-center justify-between py-4">
                 <h1 class="text-2xl">Toby's Rest API</h1>
                 <nav>
                     <ul class="flex">
@@ -34,9 +34,9 @@
                 @yield('content')
             </main>
         </div>
-        <div class="w-full py-12 bg-stone-800">
+        <div class="w-full py-12 bg-white/30 backdrop backdrop-blur">
             <footer class="container mx-auto">
-                <p class="text-white text-center">Made with <3 by Toby</p>
+                <p class="text-gray-800 text-center">Made with <3 by Toby</p>
             </footer>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
@@ -44,17 +44,17 @@
         <script>
             VANTA.WAVES({
                 el: "#wave-body",
-                mouseControls: true,
-                touchControls: true,
+                mouseControls: false,
+                touchControls: false,
                 gyroControls: false,
                 minHeight: 200.00,
                 minWidth: 200.00,
-                scale: 1.00,
+                scale: 0.835,
                 scaleMobile: 1.00,
                 color: 0x939393,
-                shininess: 20.00,
-                waveSpeed: 0.60,
-                zoom: 1.04
+                shininess: 10.00,
+                waveSpeed: 0.20,
+                zoom: 1.00
             })
         </script>
     </body>
