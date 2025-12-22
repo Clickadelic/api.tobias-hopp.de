@@ -17,45 +17,6 @@
         @endif
     </head>
     <body class="min-h-dvh flex flex-col items-center jusitfy-between bg-gray-200" id="wave-body">
-        <div class="w-full bg-white/30 backdrop backdrop-blur shadow-md">
-            <header class="container mx-auto flex items-center justify-between py-4">
-                <h1 class="text-2xl">Toby's Rest API</h1>
-                <nav>
-                    <ul class="flex gap-3">
-                        <li><a href="/" class="font-medium" title="Startseite">Startseite</a></li>
-                        <li><a href="/about" class="font-medium"  title="About">About</a></li>
-                        <li><a href="/contact" class="font-medium"  title="Contact">Contact</a></li>
-                    </ul>
-                </nav>
-            </header>
-        </div>
-        <div class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
-            <main class="container mx-auto grow">
-                @yield('content')
-            </main>
-        </div>
-        <div class="w-full py-12 bg-white/30 backdrop backdrop-blur">
-            <footer class="container mx-auto">
-                <p class="text-gray-800 text-center">Made with <img src="../images/heart-outline.svg" alt="Heart" /> by Toby</p>
-            </footer>
-        </div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.waves.min.js"></script>
-        <script>
-            VANTA.WAVES({
-                el: "#wave-body",
-                mouseControls: false,
-                touchControls: false,
-                gyroControls: false,
-                minHeight: 200.00,
-                minWidth: 200.00,
-                scale: 0.835,
-                scaleMobile: 1.00,
-                color: 0x939393,
-                shininess: 10.00,
-                waveSpeed: 0.20,
-                zoom: 1.00
-            })
-        </script>
+        @yield('body')
     </body>
 </html>
