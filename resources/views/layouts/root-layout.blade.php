@@ -22,9 +22,9 @@
                 <h1 class="text-2xl">Toby's Rest API</h1>
                 <nav>
                     <ul class="flex">
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/about">About</a></li>
-                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="/" title="Startseite">Startseite</a></li>
+                        <li><a href="/about" title="About">About</a></li>
+                        <li><a href="/contact" title="Contact">Contact</a></li>
                     </ul>
                 </nav>
             </header>
