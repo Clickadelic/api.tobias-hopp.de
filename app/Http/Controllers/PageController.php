@@ -15,24 +15,4 @@ class PageController extends Controller
     {
         return view('frontpage');
     }
-    
-    /**
-     * Display the login page
-     *
-     * @return \Illuminate\Contracts\View\View
-     */
-    public function login()
-    {
-        return view('login');
-    }
-
-    /**
-     * Displays the logout page
-     *
-     * @return \Illuminate\Contracts\View\View
-     */
-    public function logout()
-    {
-        return view('logout');
-    }
 }
