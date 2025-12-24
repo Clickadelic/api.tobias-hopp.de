@@ -1,3 +1,9 @@
-<div>
-    <!-- Let all your things have their places; let each part of your business have its time. - Benjamin Franklin -->
-</div>
+@extends('layouts.root-layout')
+
+@section('body')
+
+    <main class="flex-1">
+        @yield('content')
+    </main>
+    @include('components.footer-scripts')
+@endsection
