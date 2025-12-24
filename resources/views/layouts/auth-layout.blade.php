@@ -1,7 +1,7 @@
-@extends('layouts.root-layout')
+@extends('layouts.root')
 
 @section('body')
-    <main class="flex-1">
+    <main class="flex flex-col justify-center items-center grow">
         @yield('content')
     </main>
     @include('components.footer-scripts')
