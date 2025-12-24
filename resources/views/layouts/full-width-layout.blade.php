@@ -1,4 +1,4 @@
-@extends('layouts.app.full-width.layout')
+@extends('layouts.root-layout')
 
 @section('body')
     @include('components.header')
