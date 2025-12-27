@@ -82,6 +82,7 @@ jobs:
           set -euo pipefail
           PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
           ssh -i "$HOME/.ssh/web_deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -p "$PORT" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "mkdir -p \"${{ secrets.DEPLOY_PATH }}\""
+          mkdir -p resources/views
 
       - name: Upload app (tar stream, exclude dev files)
         shell: bash
