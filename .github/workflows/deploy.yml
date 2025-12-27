@@ -39,7 +39,7 @@ jobs:
       - name: Write SSH key (base64 from secret)
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
           KEY="$HOME/.ssh/web_deploy_key"
@@ -47,22 +47,23 @@ jobs:
             echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_B64 is not set"
             exit 1
           fi
-          # accept either base64 of the key, or a raw PEM pasted by mistake
           RAW="${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}"
-          if printf "%s" "$RAW" | grep -q "BEGIN OPENSSH PRIVATE KEY"; then
-            # treat as raw PEM
-            printf "%s\n" "$RAW" | tr -d '\r' > "$KEY"
+          TMP="$KEY.b64"
+          printf "%s" "$RAW" | tr -d '\r\n ' > "$TMP"
+          if base64 -d "$TMP" > "$KEY" 2>/dev/null; then
+            :
           else
-            # sanitize and fix missing padding, then decode
-            CLEAN=$(printf "%s" "$RAW" | tr -d '\r\n ')
-            rem=$(( ${#CLEAN} % 4 ))
-            if [ $rem -eq 2 ]; then CLEAN="${CLEAN}=="; fi
-            if [ $rem -eq 3 ]; then CLEAN="${CLEAN}="; fi
-            printf "%s" "$CLEAN" | base64 -d > "$KEY"
+            if grep -q "BEGIN OPENSSH PRIVATE KEY" "$TMP"; then
+              printf "%s\n" "$RAW" | tr -d '\r' > "$KEY"
+            else
+              echo "::error title=Invalid key secret::DEPLOY_SSH_PRIVATE_KEY_B64 must be base64 of an unencrypted OpenSSH private key or the raw PEM contents."
+              exit 1
+            fi
           fi
+          rm -f "$TMP"
           chmod 600 "$KEY"
           if ! ssh-keygen -lf "$KEY" >/dev/null 2>&1; then
-            echo "::error title=Invalid SSH key::Provide a base64 of an unencrypted OpenSSH private key (or the raw PEM)."
+            echo "::error title=Invalid SSH key::Key failed validation after decode."
             exit 1
           fi
 
