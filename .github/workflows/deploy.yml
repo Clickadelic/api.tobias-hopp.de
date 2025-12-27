@@ -20,6 +20,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/Prod' }}
     runs-on: ubuntu-latest
     environment: production
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +43,6 @@ jobs:
           KEY_B64: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}
         run: |
           set -euo pipefail
-
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
 
@@ -55,10 +55,7 @@ jobs:
 
           echo "$KEY_B64" | base64 -d > "$KEY"
           chmod 600 "$KEY"
-
-          # validate key format (non-secret output)
           ssh-keygen -lf "$KEY" >/dev/null
-
 
       - name: Add host key
         shell: bash
@@ -66,31 +63,41 @@ jobs:
           set -euo pipefail
           HOST="${{ secrets.DEPLOY_HOST }}"
           PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
-          ssh-keyscan -p "$PORT" -t rsa,ed25519 -H "$HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
+          ssh-keyscan -p "$PORT" -t rsa,ed25519 -H "$HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
 
       - name: Probe SSH connectivity
         shell: bash
         run: |
           set -euo pipefail
-          HOST="${{ secrets.DEPLOY_HOST }}"
           PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
-          ssh -i "$HOME/.ssh/web_deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -p "$PORT" "${{ secrets.DEPLOY_USER }}@$HOST" echo ok
+          ssh -i "$HOME/.ssh/web_deploy_key" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o IdentitiesOnly=yes \
+            -p "$PORT" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" echo ok
 
       - name: Ensure remote directory exists
         shell: bash
         run: |
           set -euo pipefail
           PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
-          ssh -i "$HOME/.ssh/web_deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -p "$PORT" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "mkdir -p \"${{ secrets.DEPLOY_PATH }}\""
-          mkdir -p resources/views
+          ssh -i "$HOME/.ssh/web_deploy_key" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o IdentitiesOnly=yes \
+            -p "$PORT" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "mkdir -p \"${{ secrets.DEPLOY_PATH }}\""
 
-      - name: Upload app (tar stream, exclude dev files)
+      - name: Upload app (tar stream)
         shell: bash
         run: |
           set -euo pipefail
           PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
           REMOTE="${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
           REMOTE_PATH="${{ secrets.DEPLOY_PATH }}"
+
           tar \
             --exclude=.git \
             --exclude=.github \
@@ -100,27 +107,42 @@ jobs:
             --exclude=storage \
             --exclude=.env \
             --exclude=x-files \
-            --exclude=.env.example \
-            --exclude=.env.dev \
-            --exclude=.env.stage \
             -czf - . \
-          | ssh -i "$HOME/.ssh/web_deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -p "$PORT" "$REMOTE" "tar -xzf - -C \"$REMOTE_PATH\""
+          | ssh -i "$HOME/.ssh/web_deploy_key" \
+              -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes \
+              -o IdentitiesOnly=yes \
+              -p "$PORT" \
+              "$REMOTE" "tar -xzf - -C \"$REMOTE_PATH\""
 
       - name: Run remote deploy (Composer + Artisan)
         shell: bash
         run: |
           set -euo pipefail
           PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
-          ssh -i "$HOME/.ssh/web_deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -p "$PORT" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" bash -lc '
-            set -e
-            cd "${{ secrets.DEPLOY_PATH }}"
-            mkdir -p storage bootstrap/cache
-            composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-            php artisan key:generate --force || true
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            php artisan storage:link || true
-            chmod -R ug+rwx storage bootstrap/cache || true
-          '
+
+          ssh -i "$HOME/.ssh/web_deploy_key" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o IdentitiesOnly=yes \
+            -p "$PORT" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" << 'EOF'
+
+          set -e
+          cd "${{ secrets.DEPLOY_PATH }}"
+
+          mkdir -p storage bootstrap/cache resources/views
+
+          [ -f .env ] || cp .env.example .env
+
+          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+          php artisan key:generate --force || true
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache || true
+          php artisan storage:link || true
+
+          chmod -R ug+rwx storage bootstrap/cache || true
+          EOF
