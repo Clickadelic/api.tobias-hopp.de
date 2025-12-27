@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreHyperlinkRequest;
 use Illuminate\Http\Request;
 use App\Models\Hyperlink;
 
@@ -10,7 +11,7 @@ class HyperlinkController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(Hyperlink::class, 'hyperlink');
+        $this->authorizeResource(StoreHyperlinkRequest::class, 'hyperlink');
     }
 
     public function index(Request $request)
@@ -37,8 +38,8 @@ class HyperlinkController extends Controller
             ->create($data);
     }
 
-    // public function authorizeResource(Request $request)
-    // {
-    //     $this->authorize('create', Hyperlink::class);
-    // }
+    public function authorizeResource(Request $request)
+    {
+        $this->authorize('create', Hyperlink::class);
+    }
 }
