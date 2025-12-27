@@ -131,18 +131,24 @@ jobs:
           set -e
           cd "${{ secrets.DEPLOY_PATH }}"
 
+          # 1. Ordner sicherstellen (auch leer)
           mkdir -p storage bootstrap/cache resources/views
 
+          # 2. env-Datei
           [ -f .env ] || cp .env.example .env
 
-          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+          # 3. Alte Caches löschen
+          php artisan config:clear
+          php artisan view:clear || true
 
+          # 4. Composer + Artisan
+          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
           php artisan key:generate --force || true
           php artisan migrate --force
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache || true
-          php artisan storage:link || true
 
+          php artisan storage:link || true
           chmod -R ug+rwx storage bootstrap/cache || true
           EOF
