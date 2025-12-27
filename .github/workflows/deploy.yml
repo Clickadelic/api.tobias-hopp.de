@@ -38,7 +38,7 @@ jobs:
 
       - name: Write SSH key (raw PEM secret)
         env:
-          KEY_PEM: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY_PEM }}
+          KEY_B64: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}
         shell: bash
         run: |
           set -euo pipefail
