@@ -33,26 +33,32 @@ jobs:
       - name: Install Node dependencies
         run: npm ci || (rm -f package-lock.json && npm install)
 
-      - name: Build assets (Vite + Tailwind + Blade integration)
+- name: Build assets (Vite)
         run: npm run build
 
-      - name: Write SSH key (raw or base64)
+- name: Write SSH key (base64 from secret)
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
           KEY="$HOME/.ssh/web_deploy_key"
-          if [ -n "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" ]; then
-            echo "decoding base64 private key"
-            printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" | base64 -d | tr -d '\r' > "$KEY"
-          else
-            printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" | tr -d '\r' > "$KEY"
+          if [ -z "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" ]; then
+            echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_B64 is not set"
+            exit 1
           fi
+# decode base64 (tolerant of line breaks/garbage)
+          if ! printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" | base64 -d -i > "$KEY" 2>/dev/null; then
+            # fallback via python for stricter runners
+            python3 - <<'PY'
+import base64,sys
+sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))
+PY
+          fi
+          tr -d '\r' < "$KEY" > "$KEY.tmp" && mv "$KEY.tmp" "$KEY"
           chmod 600 "$KEY"
-          # Validate OpenSSH private key format (non-interactive, fail early if passphrase-protected or malformed)
           if ! ssh-keygen -lf "$KEY" >/dev/null 2>&1; then
-            echo "::error title=Invalid SSH key::Ensure the secret contains an OpenSSH private key (starts with '-----BEGIN OPENSSH PRIVATE KEY-----'). If you stored a base64 string, set DEPLOY_SSH_PRIVATE_KEY_B64 instead. Keys with a passphrase cannot be used in CI."
+            echo "::error title=Invalid SSH key::DEPLOY_SSH_PRIVATE_KEY_B64 must be a base64 of an unencrypted OpenSSH private key (begins with '-----BEGIN OPENSSH PRIVATE KEY-----')."
             exit 1
           fi
 

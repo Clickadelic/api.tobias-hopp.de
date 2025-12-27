@@ -33,7 +33,13 @@ This repository contains a standalone Laravel application that serves the API fo
 - `DEPLOY_USER` – SSH user on the server
 - `DEPLOY_PATH` – `/home/www/subdomains/api.tobias-hopp.de`
 - `DEPLOY_PORT` – optional, defaults to 22
-- `DEPLOY_SSH_PRIVATE_KEY` – contents of the shared `web_deploy_key` private key
+- `DEPLOY_SSH_PRIVATE_KEY_B64` – base64 of the shared `web_deploy_key` private key (unencrypted OpenSSH)
+
+Create the base64 value (PowerShell):
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\.ssh\web_deploy_key")) | Set-Clipboard
+```
+Paste clipboard into the secret. Remove any old `DEPLOY_SSH_PRIVATE_KEY` secrets to avoid confusion.
 
 ## Notes
 - Keep `.env` only on the server; the workflow excludes it from upload.
