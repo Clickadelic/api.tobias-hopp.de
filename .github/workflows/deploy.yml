@@ -37,18 +37,28 @@ jobs:
         run: npm run build
 
       - name: Write SSH key (raw PEM secret)
+        env:
+          KEY_PEM: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY_PEM }}
         shell: bash
         run: |
-          set -uo pipefail
+          set -euo pipefail
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
           KEY="$HOME/.ssh/web_deploy_key"
-          if [ -z "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_PEM }}" ]; then
+          if [ -z "$KEY_PEM" ]; then
             echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_PEM is not set"
             exit 1
           fi
-          printf "%s\n" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_PEM }}" | tr -d '\r' > "$KEY"
+          # write exactly as provided, then normalize CRLF -> LF
+          printf "%s" "$KEY_PEM" > "$KEY"
+          sed -i 's/\r$//' "$KEY" || true
           chmod 600 "$KEY"
+          # Non-secret diagnostics
+          echo "pem_env_length=${#KEY_PEM}"
+          echo "pem_file_bytes=$(wc -c < \"$KEY\")"
+          echo "pem_file_lines=$(wc -l < \"$KEY\")"
+          if head -1 "$KEY" | grep -qx '-----BEGIN OPENSSH PRIVATE KEY-----'; then echo "pem_header=ok"; else echo "pem_header=missing"; fi
+          if tail -1 "$KEY" | grep -qx '-----END OPENSSH PRIVATE KEY-----'; then echo "pem_footer=ok"; else echo "pem_footer=missing"; fi
           if ! ssh-keygen -lf "$KEY" >/dev/null 2>&1; then
             echo "::error title=Invalid SSH key::Secret must contain an unencrypted OpenSSH private key (BEGIN/END)."
             exit 1
