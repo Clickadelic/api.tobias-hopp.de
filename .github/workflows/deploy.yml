@@ -36,14 +36,25 @@ jobs:
       - name: Build assets (Vite + Tailwind + Blade integration)
         run: npm run build
 
-      - name: Write SSH key
+      - name: Write SSH key (raw or base64)
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
-          printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" | tr -d '\r' > "$HOME/.ssh/web_deploy_key"
-          chmod 600 "$HOME/.ssh/web_deploy_key"
+          KEY="$HOME/.ssh/web_deploy_key"
+          if [ -n "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" ]; then
+            echo "decoding base64 private key"
+            printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" | base64 -d | tr -d '\r' > "$KEY"
+          else
+            printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" | tr -d '\r' > "$KEY"
+          fi
+          chmod 600 "$KEY"
+          # Validate OpenSSH private key format (non-interactive, fail early if passphrase-protected or malformed)
+          if ! ssh-keygen -lf "$KEY" >/dev/null 2>&1; then
+            echo "::error title=Invalid SSH key::Ensure the secret contains an OpenSSH private key (starts with '-----BEGIN OPENSSH PRIVATE KEY-----'). If you stored a base64 string, set DEPLOY_SSH_PRIVATE_KEY_B64 instead. Keys with a passphrase cannot be used in CI."
+            exit 1
+          fi
 
       - name: Add host key
         shell: bash
@@ -52,6 +63,14 @@ jobs:
           HOST="${{ secrets.DEPLOY_HOST }}"
           PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
           ssh-keyscan -p "$PORT" -t rsa,ed25519 -H "$HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
+
+      - name: Probe SSH connectivity
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOST="${{ secrets.DEPLOY_HOST }}"
+          PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
+          ssh -i "$HOME/.ssh/web_deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -p "$PORT" "${{ secrets.DEPLOY_USER }}@$HOST" echo ok
 
       - name: Ensure remote directory exists
         shell: bash
