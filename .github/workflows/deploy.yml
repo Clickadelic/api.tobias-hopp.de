@@ -47,14 +47,22 @@ jobs:
             echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_B64 is not set"
             exit 1
           fi
-          # decode base64 (tolerant of whitespace)
-          printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" \
-            | tr -d '\r\n ' \
-            | base64 -d > "$KEY"
-          tr -d '\r' < "$KEY" > "$KEY.tmp" && mv "$KEY.tmp" "$KEY"
+          # accept either base64 of the key, or a raw PEM pasted by mistake
+          RAW="${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}"
+          if printf "%s" "$RAW" | grep -q "BEGIN OPENSSH PRIVATE KEY"; then
+            # treat as raw PEM
+            printf "%s\n" "$RAW" | tr -d '\r' > "$KEY"
+          else
+            # sanitize and fix missing padding, then decode
+            CLEAN=$(printf "%s" "$RAW" | tr -d '\r\n ')
+            rem=$(( ${#CLEAN} % 4 ))
+            if [ $rem -eq 2 ]; then CLEAN="${CLEAN}=="; fi
+            if [ $rem -eq 3 ]; then CLEAN="${CLEAN}="; fi
+            printf "%s" "$CLEAN" | base64 -d > "$KEY"
+          fi
           chmod 600 "$KEY"
           if ! ssh-keygen -lf "$KEY" >/dev/null 2>&1; then
-            echo "::error title=Invalid SSH key::DEPLOY_SSH_PRIVATE_KEY_B64 must be a base64 of an unencrypted OpenSSH private key (begins with '-----BEGIN OPENSSH PRIVATE KEY-----')."
+            echo "::error title=Invalid SSH key::Provide a base64 of an unencrypted OpenSSH private key (or the raw PEM)."
             exit 1
           fi
 
