@@ -36,7 +36,7 @@ jobs:
       - name: Build assets (Vite)
         run: npm run build
 
-- name: Write SSH key (raw PEM secret)
+      - name: Write SSH key (raw PEM secret)
         shell: bash
         run: |
           set -uo pipefail
