@@ -33,10 +33,10 @@ jobs:
       - name: Install Node dependencies
         run: npm ci || (rm -f package-lock.json && npm install)
 
-- name: Build assets (Vite)
+      - name: Build assets (Vite)
         run: npm run build
 
-- name: Write SSH key (base64 from secret)
+      - name: Write SSH key (base64 from secret)
         shell: bash
         run: |
           set -euo pipefail
@@ -47,14 +47,10 @@ jobs:
             echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_B64 is not set"
             exit 1
           fi
-# decode base64 (tolerant of line breaks/garbage)
-          if ! printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" | base64 -d -i > "$KEY" 2>/dev/null; then
-            # fallback via python for stricter runners
-            python3 - <<'PY'
-import base64,sys
-sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))
-PY
-          fi
+          # decode base64 (tolerant of whitespace)
+          printf "%s" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" \
+            | tr -d '\r\n ' \
+            | base64 -d > "$KEY"
           tr -d '\r' < "$KEY" > "$KEY.tmp" && mv "$KEY.tmp" "$KEY"
           chmod 600 "$KEY"
           if ! ssh-keygen -lf "$KEY" >/dev/null 2>&1; then
