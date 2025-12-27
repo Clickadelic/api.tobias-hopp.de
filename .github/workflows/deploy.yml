@@ -36,34 +36,21 @@ jobs:
       - name: Build assets (Vite)
         run: npm run build
 
-      - name: Write SSH key (base64 from secret)
+- name: Write SSH key (raw PEM secret)
         shell: bash
         run: |
           set -uo pipefail
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
           KEY="$HOME/.ssh/web_deploy_key"
-          if [ -z "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}" ]; then
-            echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_B64 is not set"
+          if [ -z "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_PEM }}" ]; then
+            echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_PEM is not set"
             exit 1
           fi
-          RAW="${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}"
-          TMP="$KEY.b64"
-          printf "%s" "$RAW" | tr -d '\r\n ' > "$TMP"
-          if base64 -d "$TMP" > "$KEY" 2>/dev/null; then
-            :
-          else
-            if grep -q "BEGIN OPENSSH PRIVATE KEY" "$TMP"; then
-              printf "%s\n" "$RAW" | tr -d '\r' > "$KEY"
-            else
-              echo "::error title=Invalid key secret::DEPLOY_SSH_PRIVATE_KEY_B64 must be base64 of an unencrypted OpenSSH private key or the raw PEM contents."
-              exit 1
-            fi
-          fi
-          rm -f "$TMP"
+          printf "%s\n" "${{ secrets.DEPLOY_SSH_PRIVATE_KEY_PEM }}" | tr -d '\r' > "$KEY"
           chmod 600 "$KEY"
           if ! ssh-keygen -lf "$KEY" >/dev/null 2>&1; then
-            echo "::error title=Invalid SSH key::Key failed validation after decode."
+            echo "::error title=Invalid SSH key::Secret must contain an unencrypted OpenSSH private key (BEGIN/END)."
             exit 1
           fi
 
