@@ -12,7 +12,6 @@
             <ul class="flex gap-3">
                 <li><a href="/" class="font-medium" title="Startseite">Startseite</a></li>
                 <li><a href="/about" class="font-medium"  title="About">About</a></li>
-                <li><a href="/contact" class="font-medium"  title="Contact">Contact</a></li>
             </ul>
         </nav>
     </header>
