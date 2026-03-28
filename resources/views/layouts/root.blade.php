@@ -14,6 +14,7 @@
         @endif
     </head>
     <body class="min-h-dvh flex flex-col items-center jusitfy-between bg-linear-to-br from-slate-700 to-slate-900" id="wave-body">
-        @yield('body')
+        <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_30%,rgba(59,130,246,0.4),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(236,72,153,0.4),transparent_40%),radial-gradient(circle_at_50%_90%,rgba(34,197,94,0.3),transparent_40%)]"></div>
+		@yield('body')
     </body>
 </html>
