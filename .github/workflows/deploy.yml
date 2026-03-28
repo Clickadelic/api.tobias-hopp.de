@@ -2,7 +2,7 @@ name: Deploy api.tobias-hopp.de
 
 on:
   push:
-    branches: ["Prod"]
+    branches: ["prod", "production"]
   workflow_dispatch:
 
 concurrency:
