@@ -29,7 +29,7 @@ Route::post('/register', function (Request $request) {
         'password' => 'required|string|min:8|confirmed',
     ]);
 
-    $user = User::create([
+    User::create([
         'name' => $data['name'],
         'email' => $data['email'],
         'password' => $data['password'], // 'hashed' cast on User will hash this
