@@ -2,7 +2,7 @@ name: Deploy api.tobias-hopp.de
 
 on:
   push:
-    branches: ["prod", "production"]
+    branches: ["production"]
   workflow_dispatch:
 
 concurrency:
@@ -17,7 +17,7 @@ env:
 
 jobs:
   deploy:
-    if: ${{ github.ref == 'refs/heads/Prod' }}
+    if: ${{ github.ref == 'refs/heads/production' }}
     runs-on: ubuntu-latest
     environment: production
 
