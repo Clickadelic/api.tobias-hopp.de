@@ -12,4 +12,6 @@
         "Poppins", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
         "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-la-belle-aurore: "La Belle Aurore", cursive;
+
+    --color-primary: #4673e5;
 }
