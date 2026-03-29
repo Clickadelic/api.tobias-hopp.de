@@ -27,11 +27,11 @@ jobs:
       - name: Run Pint
         run: vendor/bin/pint
 
-      - name: Format Frontend
-        run: npm run format
+      - name: Format Frontend (optional)
+        run: npm run format --if-present
 
-      - name: Lint Frontend
-        run: npm run lint
+      - name: Lint Frontend (optional)
+        run: npm run lint --if-present
 
       # - name: Commit Changes
       #   uses: stefanzweifel/git-auto-commit-action@v7
