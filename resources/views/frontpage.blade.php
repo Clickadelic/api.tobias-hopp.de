@@ -5,7 +5,7 @@
         <div class="bg-white rounded py-6 md:py-12 px-12 flex flex-col items-center justify-center">                       
             <h2 class="text-2xl font-medium text-slate-800 mb-3 flex gap-2"><span class="font-la-belle-aurore">Toby's</span><span class="text-slate-500">{ </span><span>API</span><span class="text-slate-500"> }</span> Service</h2>
             <p class="text-sm text-slate-500">This API provides access &shy;to various <br>features and functionalities &shy;of Toby's platform.</p>
-            <div class="flex items-center justify-center gap-4 ">
+            <div class="flex items-center justify-center gap-4 text-center">
                 <code class="mt-3 sm:mt-5 block text-center text-xs sm:text-sm md:text-base text-slate-600 w-37.5 sm:w-55 md:w-88.75">https://api.tobias-hopp.de/up</code>
                 <button class="mt-4 cursor-default hover:cursor-pointer hover:text-slate-500" title="Copy to clipboard" id="copy-to-clipboard">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-plus" viewBox="0 0 16 16">
