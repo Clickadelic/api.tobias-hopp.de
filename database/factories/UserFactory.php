@@ -28,7 +28,7 @@ class UserFactory extends Factory
             'name' => 'Clickadelic',
             'email' => 'click@clickadelic.de',
             'email_verified_at' => now(),
-            'password' => 'DevLocal12345!', // 'hashed' cast on User model will hash this automatically
+            'password' => 'forello204',
             'remember_token' => Str::random(10),
         ];
     }
