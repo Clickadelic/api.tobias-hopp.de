@@ -14,7 +14,7 @@ class HyperlinkController extends Controller
         $this->authorizeResource(StoreHyperlinkRequest::class, 'hyperlink');
     }
 
-    public function index(Request $request)
+    public function index(StoreHyperlinkRequest $request)
     {
         return $request->user()
             ->hyperlinks()
@@ -23,7 +23,7 @@ class HyperlinkController extends Controller
             ->get();
     }
 
-    public function store(Request $request)
+    public function store(StoreHyperlinkRequest $request)
     {
         $data = $request->validate([
             'title'       => 'required|string|max:255',
@@ -38,7 +38,7 @@ class HyperlinkController extends Controller
             ->create($data);
     }
 
-    public function authorizeResource(Request $request)
+    public function authorizeResource(StoreHyperlinkRequest $request)
     {
         $this->authorize('create', Hyperlink::class);
     }
