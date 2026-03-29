@@ -1,7 +1,7 @@
 @extends('layouts.full-width-layout')
 
 @section('content')
-    <div class="bg-white/30 backdrop-blur rounded p-2 shadow max-w-lg mx-auto">
-        Docs
+    <div class="bg-white/30 shadow backdrop-blur mx-auto p-2 rounded max-w-lg">
+        Docs coming soon.
     </div>
 @endsection
