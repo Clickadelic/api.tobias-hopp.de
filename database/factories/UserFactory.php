@@ -26,9 +26,9 @@ class UserFactory extends Factory
         return [
             'id' => Str::uuid(),
             'name' => 'Clickadelic',
-            'email' => 'click@clicadelic',
+            'email' => 'click@clickadelic.de',
             'email_verified_at' => now(),
-            'password' => hash::make('forell0204$'),
+            'password' => 'DevLocal12345!', // 'hashed' cast on User model will hash this automatically
             'remember_token' => Str::random(10),
         ];
     }
