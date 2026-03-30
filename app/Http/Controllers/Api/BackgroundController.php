@@ -28,6 +28,7 @@ class BackgroundController extends Controller
 
         $variant = (string) $request->query('variant', 'regular');
         $strategy = (string) $request->query('strategy', 'random'); // random | daily
+        $responseMode = strtolower((string) $request->query('response', 'redirect')); // redirect | json
         $transforms = [
             'w' => $request->query('w'),
             'h' => $request->query('h'),
@@ -35,11 +36,13 @@ class BackgroundController extends Controller
             'fit' => $request->query('fit'),
         ];
 
-        $cacheKey = null; $ttl = 0;
+        $cacheKey = null; $ttl = (int) $request->query('cache_ttl', 0);
         if ($strategy === 'daily') {
             $today = CarbonImmutable::now($request->query('tz', config('app.timezone')))->format('Y-m-d');
             $cacheKey = 'bg:daily:' . $today . ':' . md5(json_encode([$collectionIds, $variant, $transforms]));
-            $ttl = 86400; // 24h
+            $ttl = $ttl > 0 ? $ttl : 86400; // default 24h unless overridden
+        } elseif ($ttl > 0) {
+            $cacheKey = 'bg:random:' . md5(json_encode([$collectionIds, $variant, $transforms]));
         }
 
         try {
@@ -47,6 +50,13 @@ class BackgroundController extends Controller
             $service->registerDownload($photo['id']); // best-effort
 
             $url = $service->buildVariantUrl($photo, $variant, $transforms);
+
+            if ($responseMode === 'json') {
+                return response()->json([
+                    'url' => $url,
+                    'photo' => $photo,
+                ]);
+            }
 
             return redirect()->away($url, 302);
         } catch (InvalidArgumentException $e) {
@@ -83,6 +93,7 @@ class BackgroundController extends Controller
         }
 
         $variant = (string) $request->query('variant', 'regular');
+        $responseMode = strtolower((string) $request->query('response', 'redirect'));
         $transforms = [
             'w' => $request->query('w'),
             'h' => $request->query('h'),
@@ -91,17 +102,28 @@ class BackgroundController extends Controller
         ];
 
         $strategy = (string) $request->query('strategy', 'random');
-        $cacheKey = null; $ttl = 0;
+        $cacheKey = null; $ttl = (int) $request->query('cache_ttl', 0);
         if ($strategy === 'daily') {
             $today = CarbonImmutable::now($tz)->format('Y-m-d');
             $cacheKey = 'bg:seasonal:daily:' . $season . ':' . $today . ':' . md5(json_encode([$collectionId, $variant, $transforms]));
-            $ttl = 86400;
+            $ttl = $ttl > 0 ? $ttl : 86400;
+        } elseif ($ttl > 0) {
+            $cacheKey = 'bg:seasonal:random:' . $season . ':' . md5(json_encode([$collectionId, $variant, $transforms]));
         }
 
         try {
             $photo = $service->getRandomPhotoFromCollections([$collectionId], [], $cacheKey, $ttl);
             $service->registerDownload($photo['id']);
             $url = $service->buildVariantUrl($photo, $variant, $transforms);
+
+            if ($responseMode === 'json') {
+                return response()->json([
+                    'url' => $url,
+                    'photo' => $photo,
+                    'season' => $season,
+                ]);
+            }
+
             return redirect()->away($url, 302);
         } catch (InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
