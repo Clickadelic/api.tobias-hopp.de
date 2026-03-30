@@ -1,7 +1,95 @@
 @extends('layouts.full-width-layout')
 
 @section('content')
-    <div class="bg-white/30 shadow backdrop-blur mx-auto p-2 rounded max-w-lg">
-        Docs coming soon.
-    </div>
+    <article class="prose prose-invert max-w-4xl w-full mx-auto bg-white/5 shadow-lg backdrop-blur p-6 rounded-lg border border-white/10">
+        <h1 class="text-2xl font-semibold text-gray-100 mb-4">API Documentation</h1>
+
+        <p class="text-gray-300">All endpoints are under the <code class="text-primary">/api</code> prefix. JSON examples use PowerShell-compatible curl. Replace placeholders as needed.</p>
+
+        <hr class="my-6 border-white/10" />
+
+        <section id="auth" class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-100">Authentication</h2>
+            <p class="text-gray-300">Obtain a Bearer token via register or login. Use the token in the <code>Authorization</code> header for protected routes.</p>
+
+            <h3 class="mt-4 font-semibold text-gray-200">Register</h3>
+            <p class="text-gray-300">POST <code>/api/register</code></p>
+            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code>curl -X POST http://127.0.0.1:8000/api/register `
+  -H "Content-Type: application/json" `
+  -d '{"name":"Admin","email":"you@example.com","password":"yourPassword","password_confirmation":"yourPassword"}'</code></pre>
+            <p class="text-gray-300">Response contains <code>token</code> (string) and <code>user</code>.</p>
+
+            <h3 class="mt-4 font-semibold text-gray-200">Login</h3>
+            <p class="text-gray-300">POST <code>/api/login</code></p>
+            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code>curl -X POST http://127.0.0.1:8000/api/login `
+  -H "Content-Type: application/json" `
+  -d '{"email":"you@example.com","password":"yourPassword"}'</code></pre>
+
+            <h4 class="mt-4 font-semibold text-gray-200">Verify token</h4>
+            <p class="text-gray-300">GET <code>/api/user</code> (protected)</p>
+            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code>curl http://127.0.0.1:8000/api/user `
+  -H "Authorization: Bearer &lt;TOKEN&gt;" `
+  -H "Accept: application/json"</code></pre>
+        </section>
+
+        <hr class="my-6 border-white/10" />
+
+        <section id="backgrounds" class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-100">Background Images (Unsplash)</h2>
+            <p class="text-gray-300">Public endpoints that select an Unsplash image and redirect to the image URL (or return JSON). Rate limited with <code>throttle:60,1</code>.</p>
+
+            <h3 class="mt-4 font-semibold text-gray-200">General</h3>
+            <p class="text-gray-300">GET <code>/api/background</code> or <code>/api/background/general</code></p>
+            <p class="text-gray-300">Query params:</p>
+            <ul class="list-disc list-inside text-gray-300">
+                <li><code>collections</code>=CSV or <code>collection_ids</code>=CSV or <code>collection_ids[]</code>=repeated or <code>collection_id</code>=single. If omitted, falls back to <code>UNSPLASH_COLLECTION_IDS</code> from <code>.env</code>.</li>
+                <li><code>variant</code>=raw|full|regular|small|thumb (default: regular)</li>
+                <li><code>w</code>, <code>h</code>, <code>q</code>, <code>fit</code> (applied to <em>raw</em>/<em>full</em> variants)</li>
+                <li><code>strategy</code>=random|daily (daily caches one per day)</li>
+                <li><code>cache_ttl</code>=seconds (optional cache for random or override daily)</li>
+                <li><code>tz</code>=IANA timezone (affects daily key; default: app timezone)</li>
+                <li><code>response</code>=redirect|json (default: redirect)</li>
+            </ul>
+
+            <p class="mt-3 text-gray-300">Redirect example:</p>
+            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code>curl "http://127.0.0.1:8000/api/background/general?collections=ID1,ID2&variant=raw&w=1920&q=80" -I</code></pre>
+
+            <p class="mt-3 text-gray-300">JSON mode:</p>
+            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code>curl "http://127.0.0.1:8000/api/background?collections=ID1,ID2&response=json&variant=full&w=2560&q=75"</code></pre>
+
+            <h3 class="mt-6 font-semibold text-gray-200">Seasonal</h3>
+            <p class="text-gray-300">GET <code>/api/background/seasonal</code></p>
+            <p class="text-gray-300">Uses seasonal mapping from <code>.env</code>:</p>
+            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code>UNSPLASH_COLLECTION_SPRING_ID=
+UNSPLASH_COLLECTION_SUMMER_ID=
+UNSPLASH_COLLECTION_AUTUMN_ID=
+UNSPLASH_COLLECTION_WINTER_ID=</code></pre>
+            <p class="text-gray-300">Query params:</p>
+            <ul class="list-disc list-inside text-gray-300">
+                <li><code>season</code>=spring|summer|autumn|winter (optional; auto-detects by <code>tz</code> if omitted)</li>
+                <li>All params from General endpoint are supported (<code>variant</code>, <code>w</code>, <code>h</code>, <code>q</code>, <code>fit</code>, <code>strategy</code>, <code>cache_ttl</code>, <code>tz</code>, <code>response</code>).</li>
+            </ul>
+
+            <p class="mt-3 text-gray-300">Examples:</p>
+            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code># Auto-detect season in Europe/Berlin, daily-stable selection
+curl "http://127.0.0.1:8000/api/background/seasonal?strategy=daily&variant=full&w=2560&q=75" -I
+
+# Force season for testing
+curl "http://127.0.0.1:8000/api/background/seasonal?season=autumn&variant=raw&w=1920&q=80" -I</code></pre>
+
+            <h4 class="mt-4 font-semibold text-gray-200">Attribution & Downloads</h4>
+            <p class="text-gray-300">Each selection registers a download with Unsplash (best-effort) to comply with API guidelines. JSON responses include <code>photo.user</code> for attribution.</p>
+        </section>
+
+        <hr class="my-6 border-white/10" />
+
+        <section id="notes" class="mb-2">
+            <h2 class="text-xl font-semibold text-gray-100">Notes</h2>
+            <ul class="list-disc list-inside text-gray-300">
+                <li>Global throttle: 60 requests/minute on background endpoints.</li>
+                <li>For size transforms, prefer <code>variant=raw</code> or <code>variant=full</code>.</li>
+                <li>When not passing any collections to the general endpoint, the app uses <code>UNSPLASH_COLLECTION_IDS</code> from <code>.env</code>.</li>
+            </ul>
+        </section>
+    </article>
 @endsection
