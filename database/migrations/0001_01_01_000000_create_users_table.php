@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+// Todo: remember_token kann entfernt werden, wenn nicht benötigt (nur bei Web-Authentifizierung relevant)
 return new class extends Migration
 {
     /**
