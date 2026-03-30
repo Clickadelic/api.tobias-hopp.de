@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BackgroundImage;
+use App\Models\Image;
 use Illuminate\Http\Request;
 
-class BackgroundImageController extends Controller
+class ImageController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class BackgroundImageController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BackgroundImage $backgroundImage)
+    public function show(Image $Image)
     {
         //
     }
@@ -42,7 +42,7 @@ class BackgroundImageController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(BackgroundImage $backgroundImage)
+    public function edit(Image $Image)
     {
         //
     }
@@ -50,7 +50,7 @@ class BackgroundImageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BackgroundImage $backgroundImage)
+    public function update(Request $request, Image $Image)
     {
         //
     }
@@ -58,7 +58,7 @@ class BackgroundImageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BackgroundImage $backgroundImage)
+    public function destroy(Image $Image)
     {
         //
     }
