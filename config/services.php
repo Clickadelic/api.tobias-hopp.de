@@ -35,4 +35,25 @@ return [
         ],
     ],
 
+'unsplash' => [
+        'access_key' => env('UNSPLASH_ACCESS_KEY'),
+        'secret' => env('UNSPLASH_SECRET'),
+        'callback_url' => env('UNSPLASH_CALLBACK_URL'),
+        'access_token' => env('UNSPLASH_ACCESS_TOKEN'),
+        'refresh_token' => env('UNSPLASH_REFRESH_TOKEN'),
+        'access_token_expires_at' => env('UNSPLASH_ACCESS_TOKEN_EXPIRES_AT'),
+        'utm_source' => env('UNSPLASH_UTM_SOURCE', env('APP_NAME', 'api_app')),
+        'collection_ids' => array_values(
+            array_filter(
+                array_map('trim', explode(',', (string) env('UNSPLASH_COLLECTION_IDS', '')))
+            )
+        ),
+        'seasonal' => [
+            'spring' => env('UNSPLASH_COLLECTION_SPRING_ID'),
+            'summer' => env('UNSPLASH_COLLECTION_SUMMER_ID'),
+            'autumn' => env('UNSPLASH_COLLECTION_AUTUMN_ID'),
+            'winter' => env('UNSPLASH_COLLECTION_WINTER_ID'),
+        ],
+    ],
+
 ];

@@ -24,12 +24,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'id' => Str::uuid(),
-            'name' => 'Clickadelic',
-            'email' => 'click@clickadelic.de',
-            'email_verified_at' => now(),
-            'password' => 'forello204',
-            'remember_token' => Str::random(10),
+            //
         ];
     }
 
