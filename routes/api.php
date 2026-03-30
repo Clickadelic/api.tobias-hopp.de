@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\HyperlinkController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\BackgroundController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,13 @@ use App\Http\Controllers\Api\CategoryController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+// Public background endpoints (no auth)
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/background', [BackgroundController::class, 'background']);
+    Route::get('/background/general', [BackgroundController::class, 'background']); // alias for clarity
+    Route::get('/background/seasonal', [BackgroundController::class, 'seasonal']);
+});
 
 // Public register route
 Route::post('/register', [AuthController::class, 'register']);
