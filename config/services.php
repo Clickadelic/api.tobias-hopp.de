@@ -35,7 +35,7 @@ return [
         ],
     ],
 
-    'unsplash' => [
+'unsplash' => [
         'access_key' => env('UNSPLASH_ACCESS_KEY'),
         'secret' => env('UNSPLASH_SECRET'),
         'callback_url' => env('UNSPLASH_CALLBACK_URL'),
@@ -48,6 +48,12 @@ return [
                 array_map('trim', explode(',', (string) env('UNSPLASH_COLLECTION_IDS', '')))
             )
         ),
+        'seasonal' => [
+            'spring' => env('UNSPLASH_COLLECTION_SPRING_ID'),
+            'summer' => env('UNSPLASH_COLLECTION_SUMMER_ID'),
+            'autumn' => env('UNSPLASH_COLLECTION_AUTUMN_ID'),
+            'winter' => env('UNSPLASH_COLLECTION_WINTER_ID'),
+        ],
     ],
 
 ];
