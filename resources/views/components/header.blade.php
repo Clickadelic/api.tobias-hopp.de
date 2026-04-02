@@ -9,11 +9,11 @@
             </a>
         </h1>
         <nav>
-            <ul class="flex gap-6">
+            {{-- <ul class="flex gap-6">
                 <li><a href="/" class="font-medium text-gray-300" title="Start">Start</a></li>
                 <li><a href="/about" class="font-medium text-gray-300" title="About">About</a></li>
                 <li><a href="/docs" class="font-medium text-gray-300" title="Docs">Docs</a></li>
-            </ul>
+            </ul> --}}
         </nav>
     </header>
 </div>
