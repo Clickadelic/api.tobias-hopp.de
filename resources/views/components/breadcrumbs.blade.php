@@ -1,6 +1,6 @@
-<div class="container mx-auto py-4">
+<div class="container mx-auto py-4 mb-4">
     <ul class="flex items-center text-gray-400 text-sm space-x-2">
-
+		
         {{-- Home --}}
         <li class="flex items-center space-x-1">
             <x-heroicon-o-home class="w-4 h-4" />
