@@ -14,6 +14,12 @@ class Breadcrumbs extends Component
     {
         $segments = request()->segments();
 
+        // Startseite
+        if (empty($segments)) {
+            $this->items = [];
+            return;
+        }
+
         $this->items = collect($segments)->map(function ($segment, $index) use ($segments) {
             return [
                 'name' => ucfirst(str_replace('-', ' ', $segment)),
