@@ -8,13 +8,13 @@ use App\Mail\ContactSubmissionMail;
 // use App\Models\ContactSubmission;
 // use App\Http\Requests\StoreContactSubmissionRequest;
 
-Route::get('/mail-test', function () {
+Route::get('/emails/templates/contact-submissions/trigger', function () {
 	Mail::to(config('mail.from.address'))
 		->queue(new ContactSubmissionMail());
-	return "OK";
+	return response()->json("OK", 200);
 });
 
-Route::get('/mail-show', function () {
+Route::get('/emails/templates/contact-submissions/preview', function () {
 	$mail = new ContactSubmissionMail();
 	return $mail->render();
 });

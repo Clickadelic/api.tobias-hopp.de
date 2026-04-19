@@ -1,13 +1,10 @@
 <x-mail::message>
-    # Introduction
+    # Thank you for your message!
 
-    The body of your message.
+    Thank you for contacting me! I will look into it as soon as I can and get back to you if necessary.
 
-    <x-mail::button :url="''">
-        Reply to this email
-    </x-mail::button>
-
-    Thanks,<br>
+    Thanks, have a nice day!<br>
     Toby<br>
+
     {{ config('app.name') }}
 </x-mail::message>
