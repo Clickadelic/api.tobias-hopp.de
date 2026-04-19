@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ContactSubmission;
 use App\Http\Requests\StoreContactSubmissionRequest;
 use App\Http\Requests\UpdateContactSubmissionRequest;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ContactSubmissionMail;
 
 class ContactSubmissionController extends Controller
 {
@@ -34,9 +36,11 @@ class ContactSubmissionController extends Controller
 	 */
 	public function store(StoreContactSubmissionRequest $request)
 	{
-		$contact = ContactSubmission::create($request->validated());
+		ContactSubmission::create($request->validated());
+		Mail::to(config('mail.from.address'))
+			->queue(new ContactSubmissionMail());
 
-		return response()->json($contact, 201);
+		return response()->json("OK", 201);
 	}
 
 	/**
@@ -69,5 +73,11 @@ class ContactSubmissionController extends Controller
 	public function destroy(ContactSubmission $contactSubmission)
 	{
 		//
+	}
+
+	public function sendEmail(ContactSubmission $contactSubmission)
+	{
+		Mail::to(config('mail.from.address'))
+			->queue(new ContactSubmissionMail($contactSubmission));
 	}
 }
