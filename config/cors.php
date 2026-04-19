@@ -3,7 +3,7 @@
 return [
 	'paths' => ['api/*', 'sanctum/csrf-cookie'],
 	'allowed_methods' => ['*'],
-	'allowed_origins' => ['https://www.tobias-hopp.de', 'https://*.tobias-hopp.de'],
+	'allowed_origins' => ['https://www.tobias-hopp.de', 'https://*.tobias-hopp.de', 'http://localhost:3000', 'http://localhost/*', 'http://127.0.0.1', 'http://127.0.0.1:8000'],
 	'allowed_origins_patterns' => [],
 	'allowed_headers' => ['*'],
 	'exposed_headers' => [],
