@@ -19,8 +19,14 @@ use App\Http\Controllers\Api\ContactSubmissionController;
 |
 */
 
-// Contact submission endpoint (no auth)
-Route::apiResource('contact-submissions', ContactSubmissionController::class);
+// Public
+Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
+
+// Protected
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
+});
+
 // Public register route
 Route::post('/register', [AuthController::class, 'register']);
 // Public login route to get a token
