@@ -19,17 +19,23 @@ use App\Http\Controllers\Api\ContactSubmissionController;
 |
 */
 
-// Contact submission endpoint (no auth)
-Route::apiResource('contact-submissions', ContactSubmissionController::class);
+// Public
+Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
+
+// Protected
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
+});
+
 // Public register route
 Route::post('/register', [AuthController::class, 'register']);
 // Public login route to get a token
 Route::post('/login', [AuthController::class, 'login']);
 
-// Public background endpoints (no auth)
+// Public unsplash image endpoints (no auth)
 Route::middleware('throttle:60,1')->group(function () {
-	Route::get('/background/general', [BackgroundController::class, 'background']); // alias for clarity
-	Route::get('/background/seasonal', [BackgroundController::class, 'seasonal']);
+	Route::get('/unsplash/image/general', [BackgroundController::class, 'background']);
+	Route::get('/unsplash/image/seasonal', [BackgroundController::class, 'seasonal']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

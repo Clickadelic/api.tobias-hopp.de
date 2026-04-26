@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Season;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FetchUnsplashImagesRequest;
 use App\Services\Unsplash\UnsplashImageService;
@@ -69,28 +70,24 @@ class BackgroundController extends Controller
         }
     }
 
-    // GET /api/background/seasonal
+    // GET /api/unsplash/image/seasonal
     public function seasonal(Request $request, UnsplashImageService $service): RedirectResponse|JsonResponse
     {
-        $season = strtolower((string) $request->query('season', ''));
-        $tz = (string) $request->query('tz', config('app.timezone'));
-        if (! in_array($season, ['spring','summer','autumn','fall','winter'], true)) {
-            $now = CarbonImmutable::now($tz);
-            $m = (int) $now->format('n');
-            $season = match (true) {
-                $m >= 3 && $m <= 5 => 'spring',
-                $m >= 6 && $m <= 8 => 'summer',
-                $m >= 9 && $m <= 11 => 'autumn',
-                default => 'winter',
-            };
+        $seasonParam = strtolower((string) $request->query('season', ''));
+        if ($seasonParam === 'fall') {
+            $seasonParam = 'autumn';
         }
-        if ($season === 'fall') { $season = 'autumn'; }
 
-        $map = (array) config('services.unsplash.seasonal', []);
-        $collectionId = (string) ($map[$season] ?? '');
-        if ($collectionId === '') {
-            return response()->json(['message' => "No seasonal collection configured for '{$season}'."], 422);
+        $seasonEnum = in_array($seasonParam, ['spring', 'summer', 'autumn', 'winter'], true)
+            ? Season::from($seasonParam)
+            : Season::current();
+
+        $collectionId = $seasonEnum->collectionId();
+        if (blank($collectionId)) {
+            return response()->json(['message' => "No seasonal collection configured for '{$seasonEnum->value}'."], 422);
         }
+
+        $season = $seasonEnum->value;
 
         $variant = (string) $request->query('variant', 'regular');
         $responseMode = strtolower((string) $request->query('response', 'redirect'));
@@ -102,6 +99,7 @@ class BackgroundController extends Controller
         ];
 
         $strategy = (string) $request->query('strategy', 'random');
+        $tz = (string) $request->query('tz', config('app.timezone'));
         $cacheKey = null; $ttl = (int) $request->query('cache_ttl', 0);
         if ($strategy === 'daily') {
             $today = CarbonImmutable::now($tz)->format('Y-m-d');
