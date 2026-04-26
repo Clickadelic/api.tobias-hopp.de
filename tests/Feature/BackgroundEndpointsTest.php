@@ -46,7 +46,7 @@ it('redirects to background image URL for general endpoint', function () {
     $mock->shouldReceive('buildVariantUrl')->once()->andReturn('https://example.test/img.jpg');
     $this->app->instance(UnsplashImageService::class, $mock);
 
-    get('/api/background?collections=ID1,ID2')
+    get('/api/unsplash/image/general?collections=ID1,ID2')
         ->assertRedirect('https://example.test/img.jpg');
 });
 
@@ -59,7 +59,7 @@ it('returns JSON mode when requested', function () {
     $mock->shouldReceive('buildVariantUrl')->once()->andReturn('https://example.test/img.jpg');
     $this->app->instance(UnsplashImageService::class, $mock);
 
-    get('/api/background?collections=ID1,ID2&response=json')
+    get('/api/unsplash/image/general?collections=ID1,ID2&response=json')
         ->assertOk()
         ->assertJsonStructure(['url', 'photo' => ['id','urls','user']]);
 });
@@ -67,19 +67,19 @@ it('returns JSON mode when requested', function () {
 it('returns 422 when no collections provided and no defaults configured', function () {
     Config::set('services.unsplash.collection_ids', []);
 
-    get('/api/background')
+    get('/api/unsplash/image/general')
         ->assertStatus(422);
 });
 
 it('returns 422 when seasonal mapping missing', function () {
-    Config::set('services.unsplash.seasonal', []);
+    Config::set('services.unsplash.collections', []);
 
-    get('/api/background/seasonal')
+    get('/api/unsplash/image/seasonal')
         ->assertStatus(422);
 });
 
 it('redirects to seasonal background when mapping exists', function () {
-    Config::set('services.unsplash.seasonal', [
+    Config::set('services.unsplash.collections', [
         'spring' => 'SPRING_COLLECTION',
     ]);
 
@@ -89,6 +89,6 @@ it('redirects to seasonal background when mapping exists', function () {
     $mock->shouldReceive('buildVariantUrl')->once()->andReturn('https://example.test/seasonal.jpg');
     $this->app->instance(UnsplashImageService::class, $mock);
 
-    get('/api/background/seasonal?season=spring')
+    get('/api/unsplash/image/seasonal?season=spring')
         ->assertRedirect('https://example.test/seasonal.jpg');
 });

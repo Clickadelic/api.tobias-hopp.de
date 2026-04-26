@@ -48,7 +48,7 @@ return [
                 array_map('trim', explode(',', (string) env('UNSPLASH_COLLECTION_IDS', '')))
             )
         ),
-        'seasonal' => [
+        'collections' => [
             'spring' => env('UNSPLASH_COLLECTION_SPRING_ID'),
             'summer' => env('UNSPLASH_COLLECTION_SUMMER_ID'),
             'autumn' => env('UNSPLASH_COLLECTION_AUTUMN_ID'),
