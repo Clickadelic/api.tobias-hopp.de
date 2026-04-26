@@ -40,12 +40,27 @@ class FetchUnsplashImagesRequest extends FormRequest
         // Normalize: unique, remove empties
         $collectionIds = array_values(array_unique(array_filter($collectionIds, fn ($v) => is_string($v) && $v !== '')));
 
-        $this->merge([
-            'collection_ids' => $collectionIds,
-            // Coerce numeric params if provided as strings
-            'page' => $this->has('page') ? (int) $this->input('page') : $this->input('page'),
-            'per_page' => $this->has('per_page') ? (int) $this->input('per_page') : $this->input('per_page'),
-        ]);
+        $merge = [];
+
+        // Only merge collection_ids when non-empty so the controller can
+        // fall back to configured defaults when none are supplied.
+        if ($collectionIds !== []) {
+            $merge['collection_ids'] = $collectionIds;
+        }
+
+        // Only coerce page/per_page to int when actually present in the
+        // request; merging null would make them "present" and fail the
+        // integer validation rule.
+        if ($this->has('page')) {
+            $merge['page'] = (int) $this->input('page');
+        }
+        if ($this->has('per_page')) {
+            $merge['per_page'] = (int) $this->input('per_page');
+        }
+
+        if ($merge !== []) {
+            $this->merge($merge);
+        }
     }
 
     public function rules(): array
