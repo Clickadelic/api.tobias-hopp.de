@@ -23,4 +23,8 @@ class PageController extends Controller
     {
         return view('docs');
     }
+    public function disclaimer()
+    {
+        return view('disclaimer');
+    }
 }
