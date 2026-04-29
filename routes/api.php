@@ -19,31 +19,33 @@ use App\Http\Controllers\Api\ContactSubmissionController;
 |
 */
 
-// Public
-Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
+Route::group(['prefix' => 'v1'], function () {
+	// Public
+	Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
 
-// Protected
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
-});
+	// Protected
+	Route::middleware('auth:sanctum')->group(function () {
+		Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
+	});
 
-// Public register route
-Route::post('/register', [AuthController::class, 'register']);
-// Public login route to get a token
-Route::post('/login', [AuthController::class, 'login']);
+	// Public register route
+	Route::post('/register', [AuthController::class, 'register']);
+	// Public login route to get a token
+	Route::post('/login', [AuthController::class, 'login']);
 
-// Public unsplash image endpoints (no auth)
-Route::middleware('throttle:60,1')->group(function () {
-	Route::get('/unsplash/image/general', [BackgroundController::class, 'background']);
-	Route::get('/unsplash/image/seasonal', [BackgroundController::class, 'seasonal']);
-});
+	// Public unsplash image endpoints (no auth)
+	Route::middleware('throttle:60,1')->group(function () {
+		Route::get('/unsplash/image/general', [BackgroundController::class, 'background']);
+		Route::get('/unsplash/image/seasonal', [BackgroundController::class, 'seasonal']);
+	});
 
-Route::middleware('auth:sanctum')->group(function () {
-	Route::post('/logout', [AuthController::class, 'logout']);
-	Route::post('/logout-all', [AuthController::class, 'logoutAll']);
-	Route::apiResource('hyperlinks', HyperlinkController::class);
-	Route::apiResource('categories', CategoryController::class);
-	Route::get('/user', function (Request $request) {
-		return $request->user();
+	Route::middleware('auth:sanctum')->group(function () {
+		Route::post('/logout', [AuthController::class, 'logout']);
+		Route::post('/logout-all', [AuthController::class, 'logoutAll']);
+		Route::apiResource('hyperlinks', HyperlinkController::class);
+		Route::apiResource('categories', CategoryController::class);
+		Route::get('/user', function (Request $request) {
+			return $request->user();
+		});
 	});
 });
