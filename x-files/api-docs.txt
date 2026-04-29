@@ -83,3 +83,7 @@ curl "http://127.0.0.1:8000/api/background/seasonal?season=autumn&variant=raw&w=
                 <li>When not passing any collections to the general endpoint, the app uses <code>UNSPLASH_COLLECTION_IDS</code> from <code>.env</code>.</li>
             </ul>
         </section>
+
+		<section><h2>Strategies</h2>
+		<p>/api/background/seasonal?strategy=daily&variant=full&fit=crop&w=1920&h=1080&response=json&d=${encodeURIComponent(today)}
+		</section>

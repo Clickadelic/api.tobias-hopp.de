@@ -8,7 +8,8 @@ use App\Mail\ContactSubmissionMail;
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/docs', [PageController::class, 'docs'])->name('docs');
+Route::get('/disclaimer', [PageController::class, 'disclaimer'])->name('disclaimer');
 
-if (config('app.env') === 'local') {
+// if (config('app.env') === 'local') {
 	include_once __DIR__ . '/dev.php';
-}
+// }
