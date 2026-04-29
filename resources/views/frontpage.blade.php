@@ -1,9 +1,8 @@
-@extends('layouts.full-width-layout')
+@extends('layouts.frontpage-layout')
 
 @section('content')
-    <div class="h-full grow flex flex-col items-center justify-center">
-        <div
-            class="border-2 border-primary shadow backdrop-blur mx-auto rounded max-w-lg flex flex-col justify-center items-center bg-gray-900 px-12 py-6 md:py-12">
+    <div class="min-h-full flex flex-col justify-center items-center gap-6">
+        <div class="max-w-lg w-full border-2 border-primary rounded px-12 py-6 md:py-12">
             <div class="flex flex-col justify-center items-center bg-gray-900 px-12 py-6 md:py-12 rounded">
                 <h2 class="flex gap-2 mb-3 font-medium text-gray-300 text-2xl"><span
                         class="font-la-belle-aurore text-primary text-2xl">Toby's</span><span class="text-primary">{
