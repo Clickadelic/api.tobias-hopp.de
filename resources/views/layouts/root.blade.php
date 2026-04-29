@@ -19,8 +19,7 @@
             </style>
         @endif
     </head>
-    <body class="min-h-dvh flex flex-col items-center jusitfy-between bg-gray-900" id="wave-body">
-        <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_30%,rgba(59,130,246,0.4),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(236,72,153,0.4),transparent_40%),radial-gradient(circle_at_50%_90%,rgba(34,197,94,0.3),transparent_40%)]"></div>
+    <body class="min-h-dvh flex flex-col items-center jusitfy-between bg-neutral-950">
 		@yield('body')
     </body>
 </html>
