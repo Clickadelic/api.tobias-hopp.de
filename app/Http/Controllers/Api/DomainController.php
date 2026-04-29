@@ -14,7 +14,7 @@ class DomainController extends Controller
 	 */
 	public function index()
 	{
-		$domains = Domain::all();
+		$domains = ['Test1', 'Test2', 'Test3'];
 		return response()->json($domains);
 	}
 

@@ -19,7 +19,7 @@ class Domain extends Model
 		"technical_contact",
 		"user_id"
 	];
-
+	
 	public function user()
 	{
 		return $this->belongsTo(User::class);
