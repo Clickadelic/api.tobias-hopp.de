@@ -1,5 +1,5 @@
 @if (count($items))
-    <div class="container mx-auto py-4">
+    <div class="container mx-auto p-4 mb-3 border-primary border-b-2">
         <ul class="flex items-center text-gray-400 text-sm space-x-2">
 
             <li class="flex items-center space-x-1">

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\HyperlinkController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BackgroundController;
 use App\Http\Controllers\Api\ContactSubmissionController;
+use App\Http\Controllers\Api\DomainController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,12 +41,16 @@ Route::middleware('throttle:60,1')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-	Route::post('/logout', [AuthController::class, 'logout']);
-	Route::post('/logout-all', [AuthController::class, 'logoutAll']);
-	Route::apiResource('hyperlinks', HyperlinkController::class);
-	Route::apiResource('categories', CategoryController::class);
-	Route::get('/user', function (Request $request) {
+	// Auth routes
+	Route::post('logout', [AuthController::class, 'logout']);
+	Route::post('logout-all', [AuthController::class, 'logoutAll']);
+	Route::get('user', function (Request $request) {
 		return $request->user();
 	});
+	// Hyperlink and category routes
+	Route::apiResource('hyperlinks', HyperlinkController::class);
+	Route::apiResource('categories', CategoryController::class);
+	// User routes
+	// Domain routes
+	Route::apiResource('domains', DomainController::class);
 });
-

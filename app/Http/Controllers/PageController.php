@@ -23,8 +23,21 @@ class PageController extends Controller
     {
         return view('docs');
     }
+    public function termsofservice()
+    {
+        return view('terms-of-service');
+    }
+    public function termsofuse()
+    {
+        return view('terms-of-use');
+    }
     public function disclaimer()
     {
         return view('disclaimer');
     }
+    public function cookiepolicy()
+    {
+        return view('cookie-policy');
+    }
+
 }
