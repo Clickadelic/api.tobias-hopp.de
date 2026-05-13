@@ -1,7 +1,7 @@
-@extends('layouts.full-width-layout')
+@extends('layouts.sidebar-left-layout')
 
 @section('content')
-    <div class="w-full gap-4">
+
         <h3 class="font-medium text-2xl text-gray-200">Docs</h3>
         <h4 class="font-medium text-xl text-gray-200">https://api.tobias-hopp.de/api/*</h4>
         <x-ui.accordion :single="true" class="w-full mx-auto">
@@ -21,5 +21,5 @@
             </x-ui.accordion-item>
 
         </x-ui.accordion>
-    </div>
+
 @endsection

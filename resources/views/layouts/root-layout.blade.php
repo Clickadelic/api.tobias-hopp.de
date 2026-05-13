@@ -1518,13 +1518,9 @@
         </style>
     @endif
 </head>
+<body class="min-h-dvh flex flex-col items-center justify-center bg-neutral-950 text-gray-300">
 
-<body class="min-h-dvh bg-neutral-950 text-gray-300">
-    @if (Route::is('home'))
-        asdasdasd
-    @else
-        Dingsbums
-    @endif
+@yield('body')
 
 </body>
 
