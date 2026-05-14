@@ -3,9 +3,9 @@
         <ul class="flex items-center text-gray-400 text-sm space-x-2">
 
             <li class="flex items-center space-x-1">
-                <x-heroicon-o-home class="w-4 h-4" />
-                <a href="{{ route('home') }}" class="hover:text-white">
-                    Home
+                
+                <a href="{{ route('home') }}" class="hover:text-white" title="">
+                    <x-heroicon-o-home class="w-4 h-4" />
                 </a>
             </li>
 
