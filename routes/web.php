@@ -9,11 +9,12 @@ Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/docs', [PageController::class, 'docs'])->name('docs');
 
-Route::get('/cookie-policy', [PageController::class, 'cookiepolicy'])->name('cookie-policy');
 Route::get('/disclaimer', [PageController::class, 'disclaimer'])->name('disclaimer');
+Route::get('/cookie-policy', [PageController::class, 'cookiepolicy'])->name('cookie-policy');
 
 Route::get('/terms-of-service', [PageController::class, 'termsofservice'])->name('terms-of-service');
 Route::get('/terms-of-use', [PageController::class, 'termsofuse'])->name('terms-of-use');
+Route::get('/terms-of-privacy', [PageController::class, 'termsofprivacy'])->name('terms-of-privacy');
 
 // if (config('app.env') === 'local') {
 	include_once __DIR__ . '/dev.php';
