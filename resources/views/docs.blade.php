@@ -96,7 +96,7 @@
             <p class="text-gray-300">Each selection registers a download with Unsplash (best-effort) to comply with API guidelines. JSON responses include <code>photo.user</code> for attribution.</p>
         </section>
 
-        <section id="notes" class="mb-2">
+        <section id="notes" class="mb-8">
             <h2 class="text-xl font-semibold text-gray-100">Notes</h2>
             <ul class="list-disc list-inside text-gray-300">
                 <li>Global throttle: 60 requests/minute on background endpoints.</li>
@@ -105,7 +105,7 @@
             </ul>
         </section>
 
-		<section id="strategies">
+		<section id="strategies" class="mb-8">
 			<h2>Strategies</h2>
 			<p>/api/background/seasonal?strategy=daily&variant=full&fit=crop&w=1920&h=1080&response=json&d=${encodeURIComponent(today)}
 		</section>
