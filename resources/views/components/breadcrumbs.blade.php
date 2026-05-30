@@ -1,25 +1,20 @@
 @if (count($items))
     <div class="container mx-auto p-4 mb-3 border-primary border-b-2">
         <ul class="flex items-center text-gray-400 text-sm space-x-2">
-
             <li class="flex items-center space-x-1">
-                <x-heroicon-o-home class="w-4 h-4" />
-                <a href="{{ route('home') }}" class="hover:text-white">
-                    Home
+                <a href="{{ route('home') }}" class="hover:text-white" title="">
+                    <x-heroicon-o-home class="w-4 h-4" />
                 </a>
             </li>
-
             @foreach ($items as $item)
                 <li class="flex items-center space-x-2">
                     <span>/</span>
-
                     <a href="{{ $item['url'] }}"
                        class="capitalize {{ $loop->last ? 'text-white font-semibold' : 'hover:text-white' }}">
                         {{ $item['name'] }}
                     </a>
                 </li>
             @endforeach
-
         </ul>
     </div>
 @endif
