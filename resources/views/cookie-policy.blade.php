@@ -1,8 +1,9 @@
 @extends('layouts.sidebar-left-layout')
 
 @section('content')
+	<div class="w-full flex flex-col gap-4">
 	<h3 class="font-medium text-2xl text-gray-200">Cookie Policy</h3>
-    <article>
+	<div class="space-y-6">
 		<section>
 			General Information Protecting your personal data is
 			important to us. This website is designed with a strong
@@ -56,5 +57,6 @@
 			by law. ### 10. Changes This privacy policy may be updated
 			to reflect changes in functionality or legal requirements.
 		</section>
-	</article>
+	</div>
+</div>
 @endsection
