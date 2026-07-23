@@ -5,19 +5,19 @@
 			<x-mobile-menu />
             <ul class="gap-6 hidden md:flex">
                 <li>
-					<a href="/" class="font-medium text-neutral-300 flex items-center justify-start gap-1" title="Start">
+					<a href="/" class="font-medium hover:text-white hover:underline underline-offset-5 text-neutral-300 flex items-center justify-start gap-1" title="Start">
 						<x-heroicon-o-home class="size-4 -mt-0.5" />
 						Start
 					</a>
 				</li>
                 <li>
-					<a href="/docs" class="font-medium text-neutral-300 flex items-center justify-start gap-1" title="Docs">
+					<a href="/docs" class="font-medium hover:text-white hover:underline underline-offset-5 text-neutral-300 flex items-center justify-start gap-1" title="Docs">
 						<x-heroicon-o-document class="size-4 -mt-0.5" />
 						Docs
 					</a>
 				</li>
                 <li>
-					<a href="/about" class="font-medium text-neutral-300 flex items-center justify-start gap-1" title="Docs">
+					<a href="/about" class="font-medium hover:text-white hover:underline underline-offset-5 text-neutral-300 flex items-center justify-start gap-1" title="Docs">
 						<x-heroicon-o-question-mark-circle class="size-4 -mt-0.5" />
 						About
 					</a>

@@ -31,6 +31,10 @@ class PageController extends Controller
     {
         return view('terms-of-use');
     }
+    public function termsofprivacy()
+    {
+        return view('terms-of-privacy');
+    }
     public function disclaimer()
     {
         return view('disclaimer');

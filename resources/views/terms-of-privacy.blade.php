@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="w-full flex flex-col gap-4">
-	<h3 class="font-medium text-2xl text-gray-200">Terms of service</h3>
+	<h3 class="font-medium text-2xl text-gray-200">Terms of privacy</h3>
 	<div class="space-y-6">
 		<section>
 			<h3>
