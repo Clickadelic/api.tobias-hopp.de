@@ -10,15 +10,20 @@ use App\Http\Requests\StoreContactSubmissionRequest;
 use App\Http\Requests\UpdateContactSubmissionRequest;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ContactSubmissionMail;
+use Illuminate\Http\Request;
 
 class ContactSubmissionController extends Controller
 {
 	/**
 	 * Display a listing of the resource.
 	 */
-	public function index()
+	public function index(Request $request)
 	{
-		$contacts = ContactSubmission::all();
+		$perPage = min(max((int) $request->query('per_page', 10), 1), 50);
+		$contacts = ContactSubmission::query()
+			->latest()
+			->paginate($perPage)
+			->withQueryString();
 
 		return response()->json($contacts);
 	}
