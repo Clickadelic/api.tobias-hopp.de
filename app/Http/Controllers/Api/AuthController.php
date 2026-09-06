@@ -12,53 +12,71 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request): JsonResponse
-    {
-        $user = User::create($request->validated());
+	public function register(RegisterRequest $request): JsonResponse
+	{
+		$user = User::create($request->validated());
+		$user->sendEmailVerificationNotification();
 
-        $token = $user->createToken('api-token')->plainTextToken;
+		$token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Registered successfully',
-            'user' => $user,
-            'token' => $token,
-        ], 201);
-    }
+		return response()->json([
+			'message' => 'Registered successfully',
+			'user' => $user,
+			'token' => $token,
+		], 201);
+	}
 
-    public function login(LoginRequest $request): JsonResponse
-    {
-        $data = $request->validated();
+	public function resendVerification(Request $request): JsonResponse
+	{
+		$user = $request->user();
 
-        $user = User::where('email', $data['email'])->first();
+		if ($user->hasVerifiedEmail()) {
+			return response()->json([
+				'message' => 'Email address is already verified.',
+			], 422);
+		}
 
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
+		$user->sendEmailVerificationNotification();
 
-        $token = $user->createToken('api-token')->plainTextToken;
+		return response()->json([
+			'message' => 'Verification email sent.',
+		]);
+	}
 
-        return response()->json([
-            'message' => 'Logged in successfully',
-            'user' => $user,
-            'token' => $token,
-        ]);
-    }
+	public function login(LoginRequest $request): JsonResponse
+	{
+		$data = $request->validated();
 
-    public function logout(Request $request): JsonResponse
-    {
-        $request->user()->currentAccessToken()?->delete();
+		$user = User::where('email', $data['email'])->first();
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
-    }
+		if (! $user || ! Hash::check($data['password'], $user->password)) {
+			return response()->json(['message' => 'Invalid credentials'], 401);
+		}
 
-    public function logoutAll(Request $request): JsonResponse
-    {
-        $request->user()->tokens()->delete();
+		$token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Logged out from all devices successfully',
-        ]);
-    }
+		return response()->json([
+			'message' => 'Logged in successfully',
+			'user' => $user,
+			'token' => $token,
+		]);
+	}
+
+	public function logout(Request $request): JsonResponse
+	{
+		$request->user()->currentAccessToken()?->delete();
+
+		return response()->json([
+			'message' => 'Logged out successfully',
+		]);
+	}
+
+	public function logoutAll(Request $request): JsonResponse
+	{
+		$request->user()->tokens()->delete();
+
+		return response()->json([
+			'message' => 'Logged out from all devices successfully',
+		]);
+	}
 }

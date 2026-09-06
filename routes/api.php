@@ -25,7 +25,7 @@ use App\Http\Controllers\Api\DomainController;
 Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
 
 // Protected
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 	Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
 });
 
@@ -33,6 +33,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/register', [AuthController::class, 'register']);
 // Public login route to get a token
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])
+	->middleware(['auth:sanctum', 'throttle:6,1']);
 
 // Public unsplash image endpoints (no auth)
 Route::middleware('throttle:60,1')->group(function () {
@@ -40,7 +42,7 @@ Route::middleware('throttle:60,1')->group(function () {
 	Route::get('/unsplash/image/seasonal', [BackgroundController::class, 'seasonal']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 	// Auth routes
 	Route::post('logout', [AuthController::class, 'logout']);
 	Route::post('logout-all', [AuthController::class, 'logoutAll']);
