@@ -18,7 +18,7 @@ set_env() {
   if grep -q "^${key}=" .env; then
     sed -i "s|^${key}=.*|${key}=${value}|" .env
   else
-    echo "${key}=${value}" >> .env
+    printf '\n%s=%s\n' "$key" "$value" >> .env
   fi
 }
 
