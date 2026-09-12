@@ -3,11 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\HyperlinkController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BackgroundController;
 use App\Http\Controllers\Api\ContactSubmissionController;
-use App\Http\Controllers\Api\DomainController;
+use App\Http\Controllers\Api\MonitorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +24,7 @@ use App\Http\Controllers\Api\DomainController;
 Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
 
 // Protected
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 	Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
 });
 
@@ -33,6 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/register', [AuthController::class, 'register']);
 // Public login route to get a token
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])
+	->middleware(['auth:sanctum', 'throttle:6,1']);
 
 // Public unsplash image endpoints (no auth)
 Route::middleware('throttle:60,1')->group(function () {
@@ -40,17 +41,13 @@ Route::middleware('throttle:60,1')->group(function () {
 	Route::get('/unsplash/image/seasonal', [BackgroundController::class, 'seasonal']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 	// Auth routes
 	Route::post('logout', [AuthController::class, 'logout']);
 	Route::post('logout-all', [AuthController::class, 'logoutAll']);
 	Route::get('user', function (Request $request) {
 		return $request->user();
 	});
-	// Hyperlink and category routes
-	Route::apiResource('hyperlinks', HyperlinkController::class);
-	Route::apiResource('categories', CategoryController::class);
-	// User routes
-	// Domain routes
-	Route::apiResource('domains', DomainController::class);
+	// Monitor route
+	Route::get('monitor/nextcloud', [MonitorController::class, 'status']);
 });
