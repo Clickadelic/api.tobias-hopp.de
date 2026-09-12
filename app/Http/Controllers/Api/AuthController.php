@@ -9,13 +9,21 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class AuthController extends Controller
 {
 	public function register(RegisterRequest $request): JsonResponse
 	{
 		$user = User::create($request->validated());
-		$user->sendEmailVerificationNotification();
+
+		// An undeliverable verification mail shouldn't fail the whole registration.
+		try {
+			$user->sendEmailVerificationNotification();
+		} catch (TransportExceptionInterface $e) {
+			Log::warning('Verification email could not be sent.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+		}
 
 		$token = $user->createToken('api-token')->plainTextToken;
 
