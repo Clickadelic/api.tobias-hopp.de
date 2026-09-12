@@ -56,4 +56,9 @@ return [
         ],
     ],
 
+    'nextcloud' => [
+        'monitor_url' => env('NEXTCLOUD_MONITOR_URL', 'https://cloud.tobias-hopp.de/ocs/v2.php/apps/serverinfo/api/v1/info?format=json'),
+        'token' => env('NEXTCLOUD_TOKEN'),
+    ],
+
 ];

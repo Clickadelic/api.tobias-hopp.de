@@ -3,11 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\HyperlinkController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BackgroundController;
 use App\Http\Controllers\Api\ContactSubmissionController;
-use App\Http\Controllers\Api\DomainController;
+use App\Http\Controllers\Api\MonitorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,10 +48,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 	Route::get('user', function (Request $request) {
 		return $request->user();
 	});
-	// Hyperlink and category routes
-	Route::apiResource('hyperlinks', HyperlinkController::class);
-	Route::apiResource('categories', CategoryController::class);
-	// User routes
-	// Domain routes
-	Route::apiResource('domains', DomainController::class);
+	// Monitor route
+	Route::get('monitor/nextcloud', [MonitorController::class, 'status']);
 });
