@@ -24,11 +24,6 @@ use App\Http\Controllers\Api\AdminUserController;
 // Public
 Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
 
-// Protected
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-	Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
-});
-
 // Public register route
 Route::post('/register', [AuthController::class, 'register']);
 // Public login route to get a token
@@ -43,6 +38,10 @@ Route::middleware('throttle:60,1')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+	Route::middleware('role:admin')->group(function () {
+		Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
+	});
+
 	// Auth routes
 	Route::post('logout', [AuthController::class, 'logout']);
 	Route::post('logout-all', [AuthController::class, 'logoutAll']);
