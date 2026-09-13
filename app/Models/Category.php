@@ -7,18 +7,13 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Category extends Model
 {
-    use HasUuids;
+	use HasUuids;
 
-    protected $table = "categories";
-    
-    protected $fillable = [
-        'name',
-        'slug',
-        'type',
-    ];
+	protected $table = "categories";
 
-    public function hyperlinks()
-    {
-        return $this->hasMany(Hyperlink::class);
-    }
+	protected $fillable = [
+		'name',
+		'slug',
+		'type',
+	];
 }

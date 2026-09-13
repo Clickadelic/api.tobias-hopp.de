@@ -1,153 +1,153 @@
 name: Deploy api.tobias-hopp.de
 
 on:
-  push:
-    branches: ["production"]
-  workflow_dispatch:
+    push:
+        branches: ['production']
+    workflow_dispatch:
 
 concurrency:
-  group: deploy-api-production
-  cancel-in-progress: true
+    group: deploy-api-production
+    cancel-in-progress: true
 
 permissions:
-  contents: read
+    contents: read
 
 env:
-  NODE_VERSION: "24"
+    NODE_VERSION: '24'
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    environment: production
+    deploy:
+        runs-on: ubuntu-latest
+        environment: production
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: npm
 
-      - name: Install Node dependencies
-        run: npm ci || (rm -f package-lock.json && npm install)
+            - name: Install Node dependencies
+              run: npm ci || (rm -f package-lock.json && npm install)
 
-      - name: Build assets (Vite)
-        run: npm run build
+            - name: Build assets (Vite)
+              run: npm run build
 
-      - name: Write SSH key (base64 secret)
-        shell: bash
-        env:
-          KEY_B64: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$HOME/.ssh"
-          chmod 700 "$HOME/.ssh"
+            - name: Write SSH key (base64 secret)
+              shell: bash
+              env:
+                  KEY_B64: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY_B64 }}
+              run: |
+                  set -euo pipefail
+                  mkdir -p "$HOME/.ssh"
+                  chmod 700 "$HOME/.ssh"
 
-          KEY="$HOME/.ssh/web_deploy_key"
+                  KEY="$HOME/.ssh/web_deploy_key"
 
-          if [ -z "$KEY_B64" ]; then
-            echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_B64 is not set"
-            exit 1
-          fi
+                  if [ -z "$KEY_B64" ]; then
+                    echo "::error title=Missing secret::DEPLOY_SSH_PRIVATE_KEY_B64 is not set"
+                    exit 1
+                  fi
 
-          echo "$KEY_B64" | base64 -d > "$KEY"
-          chmod 600 "$KEY"
-          ssh-keygen -lf "$KEY" >/dev/null
+                  echo "$KEY_B64" | base64 -d > "$KEY"
+                  chmod 600 "$KEY"
+                  ssh-keygen -lf "$KEY" >/dev/null
 
-      - name: Add host key
-        shell: bash
-        run: |
-          set -euo pipefail
-          HOST="${{ secrets.DEPLOY_HOST }}"
-          PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
-          ssh-keyscan -p "$PORT" -t rsa,ed25519 -H "$HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
+            - name: Add host key
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  HOST="${{ secrets.DEPLOY_HOST }}"
+                  PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
+                  ssh-keyscan -p "$PORT" -t rsa,ed25519 -H "$HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
 
-      - name: Probe SSH connectivity
-        shell: bash
-        run: |
-          set -euo pipefail
-          PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
-          ssh -i "$HOME/.ssh/web_deploy_key" \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            -o IdentitiesOnly=yes \
-            -p "$PORT" \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" echo ok
+            - name: Probe SSH connectivity
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
+                  ssh -i "$HOME/.ssh/web_deploy_key" \
+                    -o BatchMode=yes \
+                    -o StrictHostKeyChecking=yes \
+                    -o IdentitiesOnly=yes \
+                    -p "$PORT" \
+                    "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" echo ok
 
-      - name: Ensure remote directory exists
-        shell: bash
-        run: |
-          set -euo pipefail
-          PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
-          ssh -i "$HOME/.ssh/web_deploy_key" \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            -o IdentitiesOnly=yes \
-            -p "$PORT" \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            "mkdir -p \"${{ secrets.DEPLOY_PATH }}\""
+            - name: Ensure remote directory exists
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
+                  ssh -i "$HOME/.ssh/web_deploy_key" \
+                    -o BatchMode=yes \
+                    -o StrictHostKeyChecking=yes \
+                    -o IdentitiesOnly=yes \
+                    -p "$PORT" \
+                    "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+                    "mkdir -p \"${{ secrets.DEPLOY_PATH }}\" && rm -rf \"${{ secrets.DEPLOY_PATH }}/database/migrations\" \"${{ secrets.DEPLOY_PATH }}/app\" \"${{ secrets.DEPLOY_PATH }}/routes\" \"${{ secrets.DEPLOY_PATH }}/config\""
 
-      - name: Upload app (tar stream)
-        shell: bash
-        run: |
-          set -euo pipefail
-          PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
-          REMOTE="${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
-          REMOTE_PATH="${{ secrets.DEPLOY_PATH }}"
+            - name: Upload app (tar stream)
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
+                  REMOTE="${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
+                  REMOTE_PATH="${{ secrets.DEPLOY_PATH }}"
 
-          tar \
-            --exclude=.git \
-            --exclude=.github \
-            --exclude=node_modules \
-            --exclude=vendor \
-            --exclude=tests \
-            --exclude=storage \
-            --exclude=.env \
-            --exclude=x-files \
-            -czf - . \
-          | ssh -i "$HOME/.ssh/web_deploy_key" \
-              -o BatchMode=yes \
-              -o StrictHostKeyChecking=yes \
-              -o IdentitiesOnly=yes \
-              -p "$PORT" \
-              "$REMOTE" "tar -xzf - -C \"$REMOTE_PATH\""
+                  tar \
+                    --exclude=.git \
+                    --exclude=.github \
+                    --exclude=node_modules \
+                    --exclude=vendor \
+                    --exclude=tests \
+                    --exclude=storage \
+                    --exclude=.env \
+                    --exclude=x-files \
+                    -czf - . \
+                  | ssh -i "$HOME/.ssh/web_deploy_key" \
+                      -o BatchMode=yes \
+                      -o StrictHostKeyChecking=yes \
+                      -o IdentitiesOnly=yes \
+                      -p "$PORT" \
+                      "$REMOTE" "tar -xzf - -C \"$REMOTE_PATH\""
 
-      - name: Run remote deploy (Composer + Artisan)
-        shell: bash
-        run: |
-          set -euo pipefail
-          PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
+            - name: Run remote deploy (Composer + Artisan)
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  PORT="${{ secrets.DEPLOY_PORT }}"; [ -z "$PORT" ] && PORT=22
 
-          ssh -i "$HOME/.ssh/web_deploy_key" \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            -o IdentitiesOnly=yes \
-            -p "$PORT" \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" << 'EOF'
+                  ssh -i "$HOME/.ssh/web_deploy_key" \
+                    -o BatchMode=yes \
+                    -o StrictHostKeyChecking=yes \
+                    -o IdentitiesOnly=yes \
+                    -p "$PORT" \
+                    "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" << 'EOF'
 
-          set -e
-          cd "${{ secrets.DEPLOY_PATH }}"
+                  set -e
+                  cd "${{ secrets.DEPLOY_PATH }}"
 
-          # 1. Ordner sicherstellen (auch leer)
-          mkdir -p storage bootstrap/cache resources/views
+                  # 1. Ordner sicherstellen (auch leer)
+                  mkdir -p storage bootstrap/cache resources/views
 
-          # 2. env-Datei
-          [ -f .env ] || cp .env.example .env
+                  # 2. env-Datei
+                  [ -f .env ] || cp .env.example .env
 
-          # 3. Alte Caches löschen
-          php artisan config:clear
-          php artisan view:clear || true
+                  # 3. Alte Caches löschen
+                  php artisan config:clear
+                  php artisan view:clear || true
 
-          # 4. Composer + Artisan
-          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-          php artisan key:generate --force || true
-          php artisan migrate --force
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache || true
+                  # 4. Composer + Artisan
+                  composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+                  php artisan key:generate --force || true
+                  php artisan migrate --force
+                  php artisan config:cache
+                  php artisan route:cache
+                  php artisan view:cache || true
 
-          php artisan storage:link || true
-          chmod -R ug+rwx storage bootstrap/cache || true
-          EOF
+                  php artisan storage:link || true
+                  chmod -R ug+rwx storage bootstrap/cache || true
+                  EOF

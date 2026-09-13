@@ -10,42 +10,22 @@ use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+	use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
-    {
+	/**
+	 * Seed the application's database.
+	 */
+	public function run(): void
+	{
 
-		// Clickadelic
+		// Batman
 		User::create([
 			'id' => Str::uuid(),
-			'name' => 'Clickadelic',
-			'email' => 'click@clickadelic.de',
+			'name' => 'Batman',
+			'email' => 'batman@clickadelic.de',
 			'email_verified_at' => now(),
-			'password' => 'forello204$',
+			'password' => Hash::make('forello204$'), // Korrigiert
 			'remember_token' => Str::random(10),
 		]);
-
-		// Walter White
-		User::create([
-			'id' => Str::uuid(),
-			'name' => 'WalterWhite',
-			'email' => 'walter@breaking-bad.com',
-			'email_verified_at' => now(),
-			'password' => Hash::make('password'),
-			'remember_token' => Str::random(10),
-		]);
-
-		// Jesse Pinkman
-		User::create([
-			'id' => Str::uuid(),
-			'name' => 'JessePinkman',
-			'email' => 'jesse@breaking-bad.com',
-			'email_verified_at' => now(),
-			'password' => Hash::make('password'),
-			'remember_token' => Str::random(10),
-		]);
-    }
+	}
 }
