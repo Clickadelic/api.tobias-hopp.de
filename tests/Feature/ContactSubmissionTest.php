@@ -1,17 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Config;
 use App\Models\ContactSubmission;
-use App\Mail\ContactSubmissionMail;
-use function Pest\Laravel\get;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
+use function Pest\Laravel\getJson;
+use function Pest\Laravel\postJson;
 
 beforeEach(function () {
 	Config::set('app.debug', true);
 });
 
-it('should save a contact submission request', function () {
-	Mail::to('mail@tobias-hopp.de')->send(new ContactSubmissionMail());
+it('rejects unauthenticated requests to the contact submissions index', function () {
+	getJson('/api/contact-submissions')
+		->assertUnauthorized();
+});
+
+it('saves a contact submission request', function () {
+	Mail::fake();
 
 	$postData = [
 		'name' => 'John Doe',
@@ -21,6 +26,8 @@ it('should save a contact submission request', function () {
 		'message' => 'Hello, this is a test message.',
 	];
 
-	get('/api/contact-submissions', $postData)
-		->assertStatus(200);
+	postJson('/api/contact-submissions', $postData)
+		->assertCreated();
+
+	expect(ContactSubmission::query()->where('email', $postData['email'])->exists())->toBeTrue();
 });

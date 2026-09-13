@@ -21,7 +21,7 @@ class AuthController extends Controller
 		// An undeliverable verification mail shouldn't fail the whole registration.
 		try {
 			$user->sendEmailVerificationNotification();
-		} catch (TransportExceptionInterface $e) {
+		} catch (\Throwable $e) {
 			Log::warning('Verification email could not be sent.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
 		}
 
