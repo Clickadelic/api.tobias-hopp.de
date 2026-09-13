@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BackgroundImageController;
 use App\Http\Controllers\Api\ContactSubmissionController;
 use App\Http\Controllers\Api\MonitorController;
+use App\Http\Controllers\Api\AdminUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,8 +47,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 	Route::post('logout', [AuthController::class, 'logout']);
 	Route::post('logout-all', [AuthController::class, 'logoutAll']);
 	Route::get('user', function (Request $request) {
-		return $request->user();
+		return response()->json((new \App\Http\Resources\UserResource($request->user()))->resolve($request));
 	});
 	// Monitor route
 	Route::get('monitor/nextcloud', [MonitorController::class, 'status']);
+
+	Route::middleware('role:admin')->prefix('admin')->group(function () {
+		Route::get('users', [AdminUserController::class, 'index']);
+		Route::patch('users/{user}/role', [AdminUserController::class, 'updateRole']);
+	});
 });
