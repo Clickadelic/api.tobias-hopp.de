@@ -2,24 +2,32 @@
 
 namespace App\Providers;
 
-use App\Models\User;
 use App\Models\Category;
-use App\Policies\UserPolicy;
-use App\Policies\CategoryPolicy;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Laravel\Sanctum\Sanctum;
 use App\Models\PersonalAccessToken;
+use App\Models\User;
+use App\Policies\CategoryPolicy;
+use App\Policies\UserPolicy;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
-	protected $policies = [
-		User::class      => UserPolicy::class,
-		Category::class  => CategoryPolicy::class,
-	];
+	/**
+	 * Register any application services.
+	 */
+	public function register(): void
+	{
+		//
+	}
 
+	/**
+	 * Bootstrap any application services.
+	 */
 	public function boot(): void
 	{
-		$this->registerPolicies();
+		Gate::policy(User::class, UserPolicy::class);
+		Gate::policy(Category::class, CategoryPolicy::class);
 
 		// Use our UUID-based token model
 		Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
