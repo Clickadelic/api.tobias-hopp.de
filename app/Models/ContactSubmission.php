@@ -3,17 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class ContactSubmission extends Model
+class ContactSubmission extends BaseModel
 {
 	/** @use HasFactory<\Database\Factories\ContactSubmissionFactory> */
-	use HasFactory, HasUuids;
+	use HasFactory;
 
 	protected $primaryKey = 'uuid';
-	public $incrementing = false;
-	protected $keyType = 'string';
 
 	protected $fillable = [
 		'name',
