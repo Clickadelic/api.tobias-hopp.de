@@ -2,11 +2,11 @@ name: Deploy api.tobias-hopp.de
 
 on:
     push:
-        branches: ['production']
+    branches: ['prod']
     workflow_dispatch:
 
 concurrency:
-    group: deploy-api-production
+    group: deploy-api-prod
     cancel-in-progress: true
 
 permissions:
