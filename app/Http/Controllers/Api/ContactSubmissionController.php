@@ -77,12 +77,15 @@ class ContactSubmissionController extends Controller
 	 */
 	public function destroy(ContactSubmission $contactSubmission)
 	{
-		//
+		$contactSubmission->delete();
+		return response()->json("Deleted", 200);
 	}
 
 	public function sendEmail(ContactSubmission $contactSubmission)
 	{
 		Mail::to(config('mail.from.address'))
 			->queue(new ContactSubmissionMail($contactSubmission));
+
+		return response()->json("Email Sent", 200);
 	}
 }

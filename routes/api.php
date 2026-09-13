@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\BackgroundController;
+use App\Http\Controllers\Api\BackgroundImageController;
 use App\Http\Controllers\Api\ContactSubmissionController;
 use App\Http\Controllers\Api\MonitorController;
 
@@ -37,8 +37,8 @@ Route::post('/email/verification-notification', [AuthController::class, 'resendV
 
 // Public unsplash image endpoints (no auth)
 Route::middleware('throttle:60,1')->group(function () {
-	Route::get('/unsplash/image/general', [BackgroundController::class, 'background']);
-	Route::get('/unsplash/image/seasonal', [BackgroundController::class, 'seasonal']);
+	Route::get('/unsplash/image/general', [BackgroundImageController::class, 'background']);
+	Route::get('/unsplash/image/seasonal', [BackgroundImageController::class, 'seasonal']);
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
