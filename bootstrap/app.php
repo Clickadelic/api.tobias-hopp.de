@@ -1,9 +1,17 @@
 <?php
 
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
+use Illuminate\Auth\Middleware\Authorize;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Http\Request;
+use Illuminate\Http\Middleware\SetCacheHeaders;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Routing\Middleware\ValidateSignature;
 
 return Application::configure(basePath: dirname(__DIR__))
 	->withRouting(
@@ -13,22 +21,18 @@ return Application::configure(basePath: dirname(__DIR__))
 		health: '/up',
 	)
 	->withMiddleware(function (Middleware $middleware): void {
-		$middleware->redirectGuestsTo(fn(Request $request): ?string => $request->is('api/*')
-			? null
-			: route('login'));
-
 		// Register common route middleware aliases used by the application.
 		// This ensures aliases like "auth" are available for uses such as 'auth:sanctum'.
 		$middleware->alias([
-			'auth' => Illuminate\Auth\Middleware\Authenticate::class,
-			'auth.basic' => Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-			'cache.headers' => Illuminate\Http\Middleware\SetCacheHeaders::class,
-			'can' => Illuminate\Auth\Middleware\Authorize::class,
-			'guest' => Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
-			'password.confirm' => Illuminate\Auth\Middleware\RequirePassword::class,
-			'signed' => Illuminate\Routing\Middleware\ValidateSignature::class,
-			'throttle' => Illuminate\Routing\Middleware\ThrottleRequests::class,
-			'verified' => Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+			'auth' => Authenticate::class,
+			'auth.basic' => AuthenticateWithBasicAuth::class,
+			'cache.headers' => SetCacheHeaders::class,
+			'can' => Authorize::class,
+			'guest' => RedirectIfAuthenticated::class,
+			'password.confirm' => RequirePassword::class,
+			'signed' => ValidateSignature::class,
+			'throttle' => ThrottleRequests::class,
+			'verified' => EnsureEmailIsVerified::class,
 		]);
 	})
 	->withExceptions(function (Exceptions $exceptions): void {

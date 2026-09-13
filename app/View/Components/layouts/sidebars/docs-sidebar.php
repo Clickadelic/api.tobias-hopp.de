@@ -6,21 +6,21 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class docs-sidebar extends Component
+class docsSidebar extends Component
 {
-    /**
-     * Create a new component instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+	/**
+	 * Create a new component instance.
+	 */
+	public function __construct()
+	{
+		//
+	}
 
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|Closure|string
-    {
-        return view('components..layouts.sidebars.docs-sidebar');
-    }
+	/**
+	 * Get the view / contents that represent the component.
+	 */
+	public function render(): View|Closure|string
+	{
+		return view('components..layouts.sidebars.docs-sidebar');
+	}
 }
