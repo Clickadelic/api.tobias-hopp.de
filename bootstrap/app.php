@@ -12,6 +12,9 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\SetCacheHeaders;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Routing\Middleware\ValidateSignature;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
 	->withRouting(
@@ -30,6 +33,9 @@ return Application::configure(basePath: dirname(__DIR__))
 			'can' => Authorize::class,
 			'guest' => RedirectIfAuthenticated::class,
 			'password.confirm' => RequirePassword::class,
+			'permission' => PermissionMiddleware::class,
+			'role' => RoleMiddleware::class,
+			'role_or_permission' => RoleOrPermissionMiddleware::class,
 			'signed' => ValidateSignature::class,
 			'throttle' => ThrottleRequests::class,
 			'verified' => EnsureEmailIsVerified::class,

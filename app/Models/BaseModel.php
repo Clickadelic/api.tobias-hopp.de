@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Laravel\Sanctum\PersonalAccessToken as SanctumToken;
+use Illuminate\Database\Eloquent\Model;
 
-class PersonalAccessToken extends SanctumToken
+abstract class BaseModel extends Model
 {
 	use HasUuids;
 
 	public $incrementing = false;
+
 	protected $keyType = 'string';
 }
