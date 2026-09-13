@@ -3,19 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
 	/** @use HasFactory<\Database\Factories\UserFactory> */
 	use HasFactory, Notifiable, HasApiTokens, HasUuids;
 
-	protected $keyType = 'string';
 	public $incrementing = false;
+	protected $keyType = 'string';
 
 	/**
 	 * The attributes that are mass assignable.

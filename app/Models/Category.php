@@ -2,23 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
-class Category extends Model
+class Category extends BaseModel
 {
-    use HasUuids;
+	protected $table = 'categories';
 
-    protected $table = "categories";
-    
-    protected $fillable = [
-        'name',
-        'slug',
-        'type',
-    ];
+	protected $fillable = [
+		'name',
+		'slug',
+		'type',
+	];
 
-    public function hyperlinks()
-    {
-        return $this->hasMany(Hyperlink::class);
-    }
+	public function hyperlinks()
+	{
+		return $this->hasMany(Hyperlink::class);
+	}
 }
