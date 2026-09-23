@@ -19,42 +19,42 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
-	->withRouting(
-		web: __DIR__ . '/../routes/web.php',
-		api: __DIR__ . '/../routes/api.php',
-		commands: __DIR__ . '/../routes/console.php',
-		health: '/up',
-	)
-	->withMiddleware(function (Middleware $middleware): void {
-		$middleware->redirectGuestsTo(fn(Request $request): ?string => null);
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(fn (Request $request): ?string => null);
 
-		// Register common route middleware aliases used by the application.
-		// This ensures aliases like "auth" are available for uses such as 'auth:sanctum'.
-		$middleware->alias([
-			'auth' => Authenticate::class,
-			'auth.basic' => AuthenticateWithBasicAuth::class,
-			'cache.headers' => SetCacheHeaders::class,
-			'can' => Authorize::class,
-			'guest' => RedirectIfAuthenticated::class,
-			'password.confirm' => RequirePassword::class,
-			'permission' => PermissionMiddleware::class,
-			'role' => RoleMiddleware::class,
-			'role_or_permission' => RoleOrPermissionMiddleware::class,
-			'signed' => ValidateSignature::class,
-			'throttle' => ThrottleRequests::class,
-			'verified' => EnsureEmailIsVerified::class,
-		]);
-	})
-	->withExceptions(function (Exceptions $exceptions): void {
-		$exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $exception): bool {
-			return $request->is('api/*') || $request->expectsJson();
-		});
+        // Register common route middleware aliases used by the application.
+        // This ensures aliases like "auth" are available for uses such as 'auth:sanctum'.
+        $middleware->alias([
+            'auth' => Authenticate::class,
+            'auth.basic' => AuthenticateWithBasicAuth::class,
+            'cache.headers' => SetCacheHeaders::class,
+            'can' => Authorize::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'password.confirm' => RequirePassword::class,
+            'permission' => PermissionMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'signed' => ValidateSignature::class,
+            'throttle' => ThrottleRequests::class,
+            'verified' => EnsureEmailIsVerified::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $exception): bool {
+            return $request->is('api/*') || $request->expectsJson();
+        });
 
-		$exceptions->render(function (AuthenticationException $exception, Request $request) {
-			if ($request->is('api/*') || $request->expectsJson()) {
-				return response()->json(['message' => 'Unauthenticated. Please login or register first to see this resource.'], 401);
-			}
+        $exceptions->render(function (AuthenticationException $exception, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
 
-			return response('Unauthenticated.', 401);
-		});
-	})->create();
+            return response('Unauthenticated.', 401);
+        });
+    })->create();

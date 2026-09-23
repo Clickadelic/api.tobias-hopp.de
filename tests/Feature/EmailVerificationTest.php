@@ -6,8 +6,13 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+	Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
+});
 
 it('sends a verification notification when a user registers', function () {
 	Notification::fake();

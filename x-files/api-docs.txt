@@ -18,8 +18,8 @@
   -d '{"email":"you@example.com","password":"yourPassword"}'</code></pre>
 
             <h4 class="mt-4 font-semibold text-gray-200">Verify token</h4>
-            <p class="text-gray-300">GET <code>/api/user</code> (protected)</p>
-            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code>curl http://127.0.0.1:8000/api/user `
+            <p class="text-gray-300">GET <code>/api/v1/me</code> (protected, verified email required)</p>
+            <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto"><code>curl http://127.0.0.1:8000/api/v1/me `
   -H "Authorization: Bearer &lt;TOKEN&gt;" `
   -H "Accept: application/json"</code></pre>
         </section>

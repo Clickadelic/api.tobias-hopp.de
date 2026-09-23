@@ -28,10 +28,10 @@
 			</pre>
 
         <h4 class="mt-4 font-semibold text-gray-200">Verify token</h4>
-        <p class="text-gray-300">GET <code>/api/user</code> (protected)</p>
+        <p class="text-gray-300">GET <code>/api/v1/me</code> (protected, verified email required)</p>
         <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto">
 				<code>
-					curl https://api.tobias-hopp.de/api/user `
+                    curl https://api.tobias-hopp.de/api/v1/me `
 					-H "Authorization: Bearer &lt;TOKEN&gt;" `
 					-H "Accept: application/json"
 				</code>
@@ -49,7 +49,8 @@
         <ul class="list-disc list-inside text-gray-300">
             <li><code>collections</code>=CSV or <code>collection_ids</code>=CSV or <code>collection_ids[]</code>=repeated or
                 <code>collection_id</code>=single. If omitted, falls back to <code>UNSPLASH_COLLECTION_IDS</code> from
-                <code>.env</code>.</li>
+                <code>.env</code>.
+            </li>
             <li><code>variant</code>=raw|full|regular|small|thumb (default: regular)</li>
             <li><code>w</code>, <code>h</code>, <code>q</code>, <code>fit</code> (applied to <em>raw</em>/<em>full</em>
                 variants)</li>
@@ -85,7 +86,8 @@
             <li><code>season</code>=spring|summer|autumn|winter (optional; auto-detects by <code>tz</code> if omitted)</li>
             <li>All params from General endpoint are supported (<code>variant</code>, <code>w</code>, <code>h</code>,
                 <code>q</code>, <code>fit</code>, <code>strategy</code>, <code>cache_ttl</code>, <code>tz</code>,
-                <code>response</code>).</li>
+                <code>response</code>).
+            </li>
         </ul>
 
         <p class="mt-3 text-gray-300">Examples:</p>
