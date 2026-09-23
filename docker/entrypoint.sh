@@ -27,6 +27,10 @@ for key in DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD APP_URL SANCTUM_S
   [ -n "$value" ] && set_env "$key" "$value"
 done
 
+# The compose vendor volume can outlive the image, so reconcile it with the
+# current lock file before running any Artisan commands.
+composer install --no-scripts --no-interaction --prefer-dist --no-progress
+
 # Generate an app key if one isn't set yet.
 if ! grep -q "^APP_KEY=base64:" .env 2>/dev/null; then
   php artisan key:generate --force
@@ -42,5 +46,7 @@ until php artisan migrate --force; do
   attempt=$((attempt + 1))
   sleep 3
 done
+
+php artisan db:seed --force
 
 exec "$@"

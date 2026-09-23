@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 test('new registrations receive the user role', function () {
 	Role::create(['name' => 'user', 'guard_name' => 'web']);
 
-	$response = $this->postJson('/api/register', [
+	$response = $this->postJson('/api/auth/register', [
 		'name' => 'Regular User',
 		'email' => 'regular@example.com',
 		'password' => 'password123',
@@ -46,7 +46,7 @@ test('login includes the users roles', function () {
 	]);
 	$user->assignRole('admin');
 
-	$this->postJson('/api/login', [
+	$this->postJson('/api/auth/login', [
 		'email' => 'admin@example.com',
 		'password' => 'password123',
 	])->assertOk()->assertJsonPath('user.roles', ['admin']);
