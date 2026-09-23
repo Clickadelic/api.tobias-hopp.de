@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
@@ -11,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -69,6 +70,15 @@ class AuthController extends Controller
 			'message' => 'Logged in successfully',
 			'user' => new UserResource($user),
 			'token' => $token,
+		]);
+	}
+
+	public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+	{
+		Password::sendResetLink($request->validated());
+
+		return response()->json([
+			'message' => 'If an account exists for that email address, a password reset link has been sent.',
 		]);
 	}
 

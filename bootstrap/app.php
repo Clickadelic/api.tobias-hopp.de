@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
 use Illuminate\Auth\Middleware\Authorize;
@@ -10,6 +11,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\SetCacheHeaders;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Routing\Middleware\ValidateSignature;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -24,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
 		health: '/up',
 	)
 	->withMiddleware(function (Middleware $middleware): void {
+		$middleware->redirectGuestsTo(fn(Request $request): ?string => null);
+
 		// Register common route middleware aliases used by the application.
 		// This ensures aliases like "auth" are available for uses such as 'auth:sanctum'.
 		$middleware->alias([
@@ -42,5 +46,15 @@ return Application::configure(basePath: dirname(__DIR__))
 		]);
 	})
 	->withExceptions(function (Exceptions $exceptions): void {
-		//
+		$exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $exception): bool {
+			return $request->is('api/*') || $request->expectsJson();
+		});
+
+		$exceptions->render(function (AuthenticationException $exception, Request $request) {
+			if ($request->is('api/*') || $request->expectsJson()) {
+				return response()->json(['message' => 'Unauthenticated. Please login or register first to see this resource.'], 401);
+			}
+
+			return response('Unauthenticated.', 401);
+		});
 	})->create();
