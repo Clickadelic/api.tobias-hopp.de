@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -11,7 +12,7 @@ uses(RefreshDatabase::class);
 it('sends a verification notification when a user registers', function () {
 	Notification::fake();
 
-	$response = $this->postJson('/api/register', [
+	$response = $this->postJson('/api/auth/register', [
 		'name' => 'Jane Doe',
 		'email' => 'jane@example.com',
 		'password' => 'password',
@@ -33,7 +34,7 @@ it('requires verified email addresses for protected api routes', function () {
 	$token = $user->createToken('test-token')->plainTextToken;
 
 	$this->withToken($token)
-		->getJson('/api/user')
+		->getJson('/api/v1/me')
 		->assertForbidden();
 
 	$verificationUrl = URL::temporarySignedRoute(
@@ -54,7 +55,7 @@ it('requires verified email addresses for protected api routes', function () {
 	auth()->forgetGuards();
 
 	$this->withToken($token)
-		->getJson('/api/user')
+		->getJson('/api/v1/me')
 		->assertOk();
 });
 
@@ -69,9 +70,21 @@ it('can resend a verification notification', function () {
 	$token = $user->createToken('test-token')->plainTextToken;
 
 	$this->withToken($token)
-		->postJson('/api/email/verification-notification')
+		->postJson('/api/auth/email/verification-notification')
 		->assertOk()
 		->assertJsonPath('message', 'Verification email sent.');
 
 	Notification::assertSentTo($user, VerifyEmail::class);
+});
+
+it('sends a password reset notification when requested', function () {
+	Notification::fake();
+
+	$user = User::factory()->create(['email' => 'jane@example.com']);
+
+	$this->postJson('/api/auth/forgot-password', ['email' => $user->email])
+		->assertOk()
+		->assertJsonPath('message', 'If an account exists for that email address, a password reset link has been sent.');
+
+	Notification::assertSentTo($user, ResetPassword::class);
 });

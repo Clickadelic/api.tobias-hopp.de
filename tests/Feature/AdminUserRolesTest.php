@@ -17,7 +17,7 @@ test('admins can list users with their roles', function () {
 	$user = User::factory()->create(['name' => 'Regular User']);
 	$user->assignRole('user');
 
-	$response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/users');
+	$response = $this->actingAs($admin, 'sanctum')->getJson('/api/v1/users');
 
 	$response->assertOk()
 		->assertJsonPath('users.0.roles', ['admin'])
@@ -31,7 +31,7 @@ test('admins can delegate the admin role', function () {
 	$user->assignRole('user');
 
 	$response = $this->actingAs($admin, 'sanctum')
-		->patchJson("/api/admin/users/{$user->id}/role", ['role' => 'admin']);
+		->patchJson("/api/v1/users/{$user->id}/role", ['role' => 'admin']);
 
 	$response->assertOk()->assertJsonPath('data.roles', ['admin']);
 	expect($user->refresh()->hasRole('admin'))->toBeTrue();
@@ -44,7 +44,7 @@ test('regular users cannot delegate roles', function () {
 	$otherUser->assignRole('user');
 
 	$this->actingAs($user, 'sanctum')
-		->patchJson("/api/admin/users/{$otherUser->id}/role", ['role' => 'admin'])
+		->patchJson("/api/v1/users/{$otherUser->id}/role", ['role' => 'admin'])
 		->assertForbidden();
 });
 
@@ -53,6 +53,6 @@ test('admins cannot remove their own admin role', function () {
 	$admin->assignRole('admin');
 
 	$this->actingAs($admin, 'sanctum')
-		->patchJson("/api/admin/users/{$admin->id}/role", ['role' => 'user'])
+		->patchJson("/api/v1/users/{$admin->id}/role", ['role' => 'user'])
 		->assertUnprocessable();
 });
