@@ -134,7 +134,7 @@ jobs:
                   mkdir -p storage bootstrap/cache resources/views
 
                   # 2. env-Datei
-                  [ -f .env ] || cp .env.example .env
+                  [ -f .env ] || cp .env.template .env
 
                   # 3. Alte Caches löschen
                   php artisan config:clear
