@@ -13,90 +13,91 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
+use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
-	public function register(RegisterRequest $request): JsonResponse
-	{
-		$user = User::create($request->validated());
-		$user->assignRole('user');
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $user = User::create($request->validated());
+        $user->assignRole(Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']));
 
-		// An undeliverable verification mail shouldn't fail the whole registration.
-		try {
-			$user->sendEmailVerificationNotification();
-		} catch (\Throwable $e) {
-			Log::warning('Verification email could not be sent.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
-		}
+        // An undeliverable verification mail shouldn't fail the whole registration.
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $e) {
+            Log::warning('Verification email could not be sent.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
 
-		$token = $user->createToken('api-token')->plainTextToken;
+        $token = $user->createToken('api-token')->plainTextToken;
 
-		return response()->json([
-			'message' => 'Registered successfully',
-			'user' => new UserResource($user),
-			'token' => $token,
-		], 201);
-	}
+        return response()->json([
+            'message' => 'Registered successfully',
+            'user' => new UserResource($user),
+            'token' => $token,
+        ], 201);
+    }
 
-	public function resendVerification(Request $request): JsonResponse
-	{
-		$user = $request->user();
+    public function resendVerification(Request $request): JsonResponse
+    {
+        $user = $request->user();
 
-		if ($user->hasVerifiedEmail()) {
-			return response()->json([
-				'message' => 'Email address is already verified.',
-			], 422);
-		}
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email address is already verified.',
+            ], 422);
+        }
 
-		$user->sendEmailVerificationNotification();
+        $user->sendEmailVerificationNotification();
 
-		return response()->json([
-			'message' => 'Verification email sent.',
-		]);
-	}
+        return response()->json([
+            'message' => 'Verification email sent.',
+        ]);
+    }
 
-	public function login(LoginRequest $request): JsonResponse
-	{
-		$data = $request->validated();
+    public function login(LoginRequest $request): JsonResponse
+    {
+        $data = $request->validated();
 
-		$user = User::where('email', $data['email'])->first();
+        $user = User::where('email', $data['email'])->first();
 
-		if (! $user || ! Hash::check($data['password'], $user->password)) {
-			return response()->json(['message' => 'Invalid credentials'], 401);
-		}
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
 
-		$token = $user->createToken('api-token')->plainTextToken;
+        $token = $user->createToken('api-token')->plainTextToken;
 
-		return response()->json([
-			'message' => 'Logged in successfully',
-			'user' => new UserResource($user),
-			'token' => $token,
-		]);
-	}
+        return response()->json([
+            'message' => 'Logged in successfully',
+            'user' => new UserResource($user),
+            'token' => $token,
+        ]);
+    }
 
-	public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
-	{
-		Password::sendResetLink($request->validated());
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        Password::sendResetLink($request->validated());
 
-		return response()->json([
-			'message' => 'If an account exists for that email address, a password reset link has been sent.',
-		]);
-	}
+        return response()->json([
+            'message' => 'If an account exists for that email address, a password reset link has been sent.',
+        ]);
+    }
 
-	public function logout(Request $request): JsonResponse
-	{
-		$request->user()->currentAccessToken()?->delete();
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()?->delete();
 
-		return response()->json([
-			'message' => 'Logged out successfully',
-		]);
-	}
+        return response()->json([
+            'message' => 'Logged out successfully',
+        ]);
+    }
 
-	public function logoutAll(Request $request): JsonResponse
-	{
-		$request->user()->tokens()->delete();
+    public function logoutAll(Request $request): JsonResponse
+    {
+        $request->user()->tokens()->delete();
 
-		return response()->json([
-			'message' => 'Logged out from all devices successfully',
-		]);
-	}
+        return response()->json([
+            'message' => 'Logged out from all devices successfully',
+        ]);
+    }
 }
