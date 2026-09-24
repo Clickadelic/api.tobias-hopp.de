@@ -8,20 +8,20 @@
         <p class="text-gray-300">Obtain a Bearer token via register or login. Use the token in the <code>Authorization</code>
             header for protected routes.</p>
         <h3 class="mt-4 font-semibold text-gray-200">Register</h3>
-        <p class="text-gray-300">POST <code>/api/register</code></p>
+        <p class="text-gray-300">POST <code>/api/auth/register</code></p>
         <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto">
 				<code>
-					curl -X POST https://api.tobias-hopp.de/api/register `
+					curl -X POST https://api.tobias-hopp.de/api/auth/register `
 					-H "Content-Type: application/json" `
 					-d '{"name":"Admin","email":"you@example.com","password":"yourPassword","password_confirmation":"yourPassword"}'
 				</code>
 			</pre>
         <p class="text-gray-300">Response contains <code>token</code> (string) and <code>user</code>.</p>
         <h3 class="mt-4 font-semibold text-gray-200">Login</h3>
-        <p class="text-gray-300">POST <code>/api/login</code></p>
+        <p class="text-gray-300">POST <code>/api/auth/login</code></p>
         <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto">
 				<code>
-					curl -X POST https://api.tobias-hopp.de/api/login `
+					curl -X POST https://api.tobias-hopp.de/api/auth/login `
 					-H "Content-Type: application/json" `
 					-d '{"email":"you@example.com","password":"yourPassword"}'
 				</code>
@@ -44,7 +44,7 @@
             JSON). Rate limited with <code>throttle:60,1</code>.</p>
 
         <h3 class="mt-4 font-semibold text-gray-200">General</h3>
-        <p class="text-gray-300">GET <code>/api/background</code> or <code>/api/background/general</code></p>
+        <p class="text-gray-300">GET <code>/api/v1/background</code> or <code>/api/v1/background/general</code></p>
         <p class="text-gray-300">Query params:</p>
         <ul class="list-disc list-inside text-gray-300">
             <li><code>collections</code>=CSV or <code>collection_ids</code>=CSV or <code>collection_ids[]</code>=repeated or
@@ -62,16 +62,16 @@
 
         <p class="mt-3 text-gray-300">Redirect example:</p>
         <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto">
-				<code>curl "https://api.tobias-hopp.de/api/background/general?collections=ID1,ID2&variant=raw&w=1920&q=80" -I
+				<code>curl "https://api.tobias-hopp.de/api/v1/background/general?collections=ID1,ID2&variant=raw&w=1920&q=80" -I
 				</code>
 			</pre>
 
         <p class="mt-3 text-gray-300">JSON mode:</p>
         <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto">
-				<code>curl "https://api.tobias-hopp.de/api/background?collections=ID1,ID2&response=json&variant=full&w=2560&q=75"</code></pre>
+				<code>curl "https://api.tobias-hopp.de/api/v1/background?collections=ID1,ID2&response=json&variant=full&w=2560&q=75"</code></pre>
 
         <h3 class="mt-6 font-semibold text-gray-200">Seasonal</h3>
-        <p class="text-gray-300">GET <code>/api/background/seasonal</code></p>
+        <p class="text-gray-300">GET <code>/api/v1/background/seasonal</code></p>
         <p class="text-gray-300">Uses seasonal mapping from <code>.env</code>:</p>
         <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto">
 				<code>
@@ -93,10 +93,10 @@
         <p class="mt-3 text-gray-300">Examples:</p>
         <pre class="bg-black/40 text-gray-200 p-3 rounded overflow-x-auto">
 				<code># Auto-detect season in Europe/Berlin, daily-stable selection
-					curl "https://api.tobias-hopp.de/api/background/seasonal?strategy=daily&variant=full&w=2560&q=75" -I
+					curl "https://api.tobias-hopp.de/api/v1/background/seasonal?strategy=daily&variant=full&w=2560&q=75" -I
 
 					# Force season for testing
-					curl "https://api.tobias-hopp.de/api/background/seasonal?season=autumn&variant=raw&w=1920&q=80" -I
+					curl "https://api.tobias-hopp.de/api/v1/background/seasonal?season=autumn&variant=raw&w=1920&q=80" -I
 				</code>
 			</pre>
 
