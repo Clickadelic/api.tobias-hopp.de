@@ -10,86 +10,83 @@ use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
-	Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
-});
-
 it('sends a verification notification when a user registers', function () {
-	Notification::fake();
+    Notification::fake();
+    Role::where('name', 'user')->where('guard_name', 'web')->delete();
 
-	$response = $this->postJson('/api/auth/register', [
-		'name' => 'Jane Doe',
-		'email' => 'jane@example.com',
-		'password' => 'password',
-		'password_confirmation' => 'password',
-	]);
+    $response = $this->postJson('/api/auth/register', [
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
 
-	$response->assertCreated()
-		->assertJsonPath('user.email_verified_at', null);
+    $response->assertCreated()
+        ->assertJsonPath('user.email_verified_at', null);
 
-	Notification::assertSentTo(User::first(), VerifyEmail::class);
+    Notification::assertSentTo(User::first(), VerifyEmail::class);
 });
 
 it('requires verified email addresses for protected api routes', function () {
-	$user = User::factory()->unverified()->create([
-		'name' => 'Jane Doe',
-		'email' => 'jane@example.com',
-		'password' => 'password',
-	]);
-	$token = $user->createToken('test-token')->plainTextToken;
+    $user = User::factory()->unverified()->create([
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'password' => 'password',
+    ]);
+    $token = $user->createToken('test-token')->plainTextToken;
 
-	$this->withToken($token)
-		->getJson('/api/v1/me')
-		->assertForbidden();
+    $this->withToken($token)
+        ->getJson('/api/v1/me')
+        ->assertForbidden();
 
-	$verificationUrl = URL::temporarySignedRoute(
-		'verification.verify',
-		now()->addMinutes(10),
-		[
-			'id' => $user->getKey(),
-			'hash' => sha1($user->getEmailForVerification()),
-		],
-	);
+    $verificationUrl = URL::temporarySignedRoute(
+        'verification.verify',
+        now()->addMinutes(10),
+        [
+            'id' => $user->getKey(),
+            'hash' => sha1($user->getEmailForVerification()),
+        ],
+    );
 
-	$this->getJson($verificationUrl)
-		->assertOk()
-		->assertJsonPath('email_verified', true);
+    $this->getJson($verificationUrl)
+        ->assertOk()
+        ->assertJsonPath('email_verified', true);
 
-	expect(User::find($user->getKey())->hasVerifiedEmail())->toBeTrue();
+    expect(User::find($user->getKey())->hasVerifiedEmail())->toBeTrue();
 
-	auth()->forgetGuards();
+    auth()->forgetGuards();
 
-	$this->withToken($token)
-		->getJson('/api/v1/me')
-		->assertOk();
+    $this->withToken($token)
+        ->getJson('/api/v1/me')
+        ->assertOk();
 });
 
 it('can resend a verification notification', function () {
-	Notification::fake();
+    Notification::fake();
 
-	$user = User::factory()->unverified()->create([
-		'name' => 'Jane Doe',
-		'email' => 'jane@example.com',
-		'password' => 'password',
-	]);
-	$token = $user->createToken('test-token')->plainTextToken;
+    $user = User::factory()->unverified()->create([
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'password' => 'password',
+    ]);
+    $token = $user->createToken('test-token')->plainTextToken;
 
-	$this->withToken($token)
-		->postJson('/api/auth/email/verification-notification')
-		->assertOk()
-		->assertJsonPath('message', 'Verification email sent.');
+    $this->withToken($token)
+        ->postJson('/api/auth/email/verification-notification')
+        ->assertOk()
+        ->assertJsonPath('message', 'Verification email sent.');
 
-	Notification::assertSentTo($user, VerifyEmail::class);
+    Notification::assertSentTo($user, VerifyEmail::class);
 });
 
 it('sends a password reset notification when requested', function () {
-	Notification::fake();
+    Notification::fake();
 
-	$user = User::factory()->create(['email' => 'jane@example.com']);
+    $user = User::factory()->create(['email' => 'jane@example.com']);
 
-	$this->postJson('/api/auth/forgot-password', ['email' => $user->email])
-		->assertOk()
-		->assertJsonPath('message', 'If an account exists for that email address, a password reset link has been sent.');
+    $this->postJson('/api/auth/forgot-password', ['email' => $user->email])
+        ->assertOk()
+        ->assertJsonPath('message', 'If an account exists for that email address, a password reset link has been sent.');
 
-	Notification::assertSentTo($user, ResetPassword::class);
+    Notification::assertSentTo($user, ResetPassword::class);
 });
