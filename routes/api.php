@@ -34,7 +34,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
-    Route::apiResource('contact-submissions', ContactSubmissionController::class);
+    Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
 
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('unsplash/image/general', [BackgroundImageController::class, 'background']);
@@ -43,7 +43,7 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::middleware('role:admin')->group(function () {
-            Route::apiResource('contact-submissions', ContactSubmissionController::class);
+            Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
             Route::get('users', [AdminUserController::class, 'index']);
             Route::patch('users/{user}/role', [AdminUserController::class, 'updateRole']);
         });
