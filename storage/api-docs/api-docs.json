@@ -6,102 +6,479 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/auth/*": {
+        "/api/v1/users": {
             "get": {
                 "tags": [
-                    "User"
+                    "Admin Users"
                 ],
-                "summary": "Endpoints for user authentication and management",
-                "operationId": "78e4d0bb853f27746658e3c8c582b37f",
+                "summary": "List all users (admin)",
+                "operationId": "f42cccbd8914e842e11a05b5e3c1a834",
                 "responses": {
                     "200": {
-                        "description": "Successful logout of the current user from all devices"
+                        "description": "All users ordered by name",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "users": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/User"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not an admin or email not verified"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{user}/role": {
+            "patch": {
+                "tags": [
+                    "Admin Users"
+                ],
+                "summary": "Change a user's role (admin)",
+                "description": "Admins cannot remove their own admin role.",
+                "operationId": "d2bc018172929c015f425b76eb4d4154",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "role"
+                                ],
+                                "properties": {
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "user",
+                                            "admin"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not an admin or email not verified"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Validation error or attempt to remove own admin role",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/auth/register": {
-            "get": {
+            "post": {
                 "tags": [
                     "User"
                 ],
                 "summary": "Register a new user",
-                "operationId": "d9aab623459dddd883427e89d59f96f2",
+                "operationId": "c7bb21a0d87049e161b8e4c9b0d909f2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jane Doe",
+                                        "maxLength": 255
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane@example.com",
+                                        "maxLength": 255
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
-                        "description": "Successful registration of a new user"
+                        "description": "User registered; a verification email is sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registered successfully"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
-        "/api/auth/resend-verification": {
-            "get": {
+        "/api/auth/email/verification-notification": {
+            "post": {
                 "tags": [
                     "User"
                 ],
-                "summary": "Resend email verification",
-                "operationId": "925f0ea90c85e448b647126b5be19382",
+                "summary": "Resend the email verification link",
+                "operationId": "870258d0555b70798c23e09dd38383e0",
                 "responses": {
                     "200": {
-                        "description": "Successful resend of email verification"
+                        "description": "Verification email sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Email address is already verified",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests (6 per minute)"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/auth/login": {
-            "get": {
+            "post": {
                 "tags": [
                     "User"
                 ],
                 "summary": "Login a user",
-                "operationId": "d4bb8343c09a0c57da2be74006aabbb4",
+                "operationId": "dd51a484b7fa0f97c7680fdbde14cf5f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful login of a user"
+                        "description": "Logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged in successfully"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
         "/api/auth/forgot-password": {
-            "get": {
+            "post": {
                 "tags": [
                     "User"
                 ],
                 "summary": "Request a password reset link",
-                "operationId": "416d5721941f8785405737a7b462e8e0",
+                "operationId": "f51c7074de53475eab87e336cc4e06a6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful request for a password reset link"
+                        "description": "Always returned, whether or not the account exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
         "/api/auth/logout": {
-            "get": {
+            "post": {
                 "tags": [
                     "User"
                 ],
-                "summary": "Logout the current user",
-                "operationId": "90a8411aa8f7315b8ce0ebafbbbe580d",
+                "summary": "Logout the current user (revokes the current token)",
+                "operationId": "df9bdc6c7a6d9f20b983526b2ec0f698",
                 "responses": {
                     "200": {
-                        "description": "Successful logout of the current user"
+                        "description": "Logged out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Email address not verified"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/auth/logout-all": {
-            "get": {
+            "post": {
                 "tags": [
                     "User"
                 ],
-                "summary": "Logout the current user from all devices",
-                "operationId": "cda03bf48b4f94276c2e068e52cbcd74",
+                "summary": "Logout the current user from all devices (revokes all tokens)",
+                "operationId": "cb4dc83917db0d5fff6f1f5a2562c05b",
                 "responses": {
                     "200": {
-                        "description": "Successful logout of the current user from all devices"
+                        "description": "Logged out everywhere",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Email address not verified"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/unsplash/image/general": {
@@ -109,26 +486,102 @@
                 "tags": [
                     "Unsplash Images"
                 ],
-                "summary": "Fetch a general background image from Unsplash",
+                "summary": "Fetch a random background image from Unsplash collections",
+                "description": "Public, throttled to 60 requests/minute. Falls back to the configured default collections when none are given.",
                 "operationId": "14041fc0ef8e8b206375b1a64f88ea50",
                 "parameters": [
                     {
-                        "name": "collection_id, collection_ids",
+                        "name": "collection_ids",
                         "in": "query",
-                        "description": "Comma-separated list of Unsplash collection IDs",
-                        "required": false,
-                        "explode": true,
+                        "description": "Unsplash collection IDs (comma-separated or repeated collection_ids[]).",
+                        "explode": false,
                         "schema": {
                             "type": "array",
                             "items": {
                                 "type": "string"
                             }
                         }
+                    },
+                    {
+                        "name": "collection_id",
+                        "in": "query",
+                        "description": "A single Unsplash collection ID.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "collections",
+                        "in": "query",
+                        "description": "Alias for collection_ids.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashVariant"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashStrategy"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashResponse"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashWidth"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashHeight"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashQuality"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashFit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashCacheTtl"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashTimezone"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful fetch of a general background image from Unsplash"
+                        "description": "Image URL and photo data (response=json)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnsplashImageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "302": {
+                        "description": "Redirect to the image (response=redirect, default)"
+                    },
+                    "422": {
+                        "description": "No collection IDs provided or configured / invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests"
+                    },
+                    "502": {
+                        "description": "Unsplash request failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -139,45 +592,621 @@
                     "Unsplash Images"
                 ],
                 "summary": "Fetch a seasonal background image from Unsplash",
+                "description": "Public, throttled to 60 requests/minute. Uses the collection configured for the season; the season is auto-detected when omitted.",
                 "operationId": "e4eef923b6d09339811c4eafd61a46f8",
                 "parameters": [
                     {
-                        "name": "collection_id, collection_ids",
+                        "name": "season",
                         "in": "query",
-                        "description": "Comma-separated list of Unsplash collection IDs",
-                        "required": false,
-                        "explode": true,
+                        "description": "Season to use ('fall' is accepted as autumn). Defaults to the current season.",
                         "schema": {
+                            "type": "string",
+                            "enum": [
+                                "spring",
+                                "summer",
+                                "autumn",
+                                "winter"
+                            ]
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashVariant"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashStrategy"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashResponse"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashWidth"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashHeight"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashQuality"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashFit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashCacheTtl"
+                    },
+                    {
+                        "$ref": "#/components/parameters/UnsplashTimezone"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image URL, photo data and season (response=json)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnsplashImageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "302": {
+                        "description": "Redirect to the image (response=redirect, default)"
+                    },
+                    "422": {
+                        "description": "No collection configured for the season",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests"
+                    },
+                    "502": {
+                        "description": "Unsplash request failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contact-submissions": {
+            "get": {
+                "tags": [
+                    "Contact Submissions"
+                ],
+                "summary": "List contact submissions (admin)",
+                "description": "Display a listing of the resource.",
+                "operationId": "4cf5d619827fc43c000ac2df41a5cb4e",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (clamped to 1-50).",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 50,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number.",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated submissions, newest first",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ContactSubmission"
+                                            }
+                                        },
+                                        "per_page": {
+                                            "type": "integer"
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        },
+                                        "last_page": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not an admin or email not verified"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Contact Submissions"
+                ],
+                "summary": "Submit the contact form",
+                "description": "Public endpoint. Stores the submission and queues a notification email.",
+                "operationId": "b8d09ce2ab54ffffad1735b12afb618a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "subject",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 255
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255
+                                    },
+                                    "subject": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "message": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Submission stored",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "OK"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contact-submissions/{contactSubmission}": {
+            "delete": {
+                "tags": [
+                    "Contact Submissions"
+                ],
+                "summary": "Delete a contact submission (admin)",
+                "description": "Remove the specified resource from storage.",
+                "operationId": "651e4cf10536c1f4a91f7e84c5e26758",
+                "parameters": [
+                    {
+                        "name": "contactSubmission",
+                        "in": "path",
+                        "description": "Contact submission ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "Deleted"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not an admin or email not verified"
+                    },
+                    "404": {
+                        "description": "Submission not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/monitor/nextcloud": {
+            "get": {
+                "tags": [
+                    "NextCloud Uptime Monitor"
+                ],
+                "summary": "Fetch the status of the Nextcloud monitor",
+                "description": "The result is cached for 30 seconds.",
+                "operationId": "007b2853ceca5304c01eccb3cc6ef0da",
+                "responses": {
+                    "200": {
+                        "description": "Monitor status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "online": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Email address not verified"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get the authenticated user",
+                "operationId": "198e2c87b3af232810f8f306eef86495",
+                "responses": {
+                    "200": {
+                        "description": "The current user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Email address not verified"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Jane Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jane@example.com"
+                    },
+                    "email_verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "user"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "Message": {
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The email field is required."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": {
                             "type": "array",
                             "items": {
                                 "type": "string"
                             }
                         }
                     }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful fetch of a seasonal background image from Unsplash"
+                },
+                "type": "object"
+            },
+            "ContactSubmission": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
+                },
+                "type": "object"
+            },
+            "UnsplashImageResponse": {
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "photo": {
+                        "description": "Unsplash photo payload (includes user for attribution).",
+                        "type": "object"
+                    },
+                    "season": {
+                        "description": "Only on the seasonal endpoint.",
+                        "type": "string",
+                        "enum": [
+                            "spring",
+                            "summer",
+                            "autumn",
+                            "winter"
+                        ]
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "parameters": {
+            "UnsplashVariant": {
+                "name": "variant",
+                "in": "query",
+                "description": "Image size variant. Resizing params (w, h, q, fit) only apply to raw/full.",
+                "schema": {
+                    "type": "string",
+                    "default": "regular",
+                    "enum": [
+                        "raw",
+                        "full",
+                        "regular",
+                        "small",
+                        "thumb"
+                    ]
+                }
+            },
+            "UnsplashStrategy": {
+                "name": "strategy",
+                "in": "query",
+                "description": "random picks a new image each call; daily keeps one image per day.",
+                "schema": {
+                    "type": "string",
+                    "default": "random",
+                    "enum": [
+                        "random",
+                        "daily"
+                    ]
+                }
+            },
+            "UnsplashResponse": {
+                "name": "response",
+                "in": "query",
+                "description": "redirect answers with a 302 to the image; json returns the URL and photo data.",
+                "schema": {
+                    "type": "string",
+                    "default": "redirect",
+                    "enum": [
+                        "redirect",
+                        "json"
+                    ]
+                }
+            },
+            "UnsplashWidth": {
+                "name": "w",
+                "in": "query",
+                "description": "Image width in pixels.",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            },
+            "UnsplashHeight": {
+                "name": "h",
+                "in": "query",
+                "description": "Image height in pixels.",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            },
+            "UnsplashQuality": {
+                "name": "q",
+                "in": "query",
+                "description": "Image quality (1-100).",
+                "schema": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            },
+            "UnsplashFit": {
+                "name": "fit",
+                "in": "query",
+                "description": "Imgix fit mode, e.g. crop or max.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "UnsplashCacheTtl": {
+                "name": "cache_ttl",
+                "in": "query",
+                "description": "Cache the selected image for this many seconds (daily defaults to 86400).",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "UnsplashTimezone": {
+                "name": "tz",
+                "in": "query",
+                "description": "IANA timezone used for the daily strategy.",
+                "schema": {
+                    "type": "string",
+                    "example": "Europe/Berlin"
                 }
             }
         },
-        "/api/v1/monitor/status": {
-            "get": {
-                "tags": [
-                    "NextCloud Uptime Monitor"
-                ],
-                "summary": "Fetch the status of the Nextcloud monitor",
-                "operationId": "6f9efe471634bc1cac5a455d42f63c02",
-                "responses": {
-                    "200": {
-                        "description": "Successful fetch of the Nextcloud monitor status"
-                    }
-                }
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Sanctum API token returned by /api/auth/login or /api/auth/register.",
+                "scheme": "bearer"
             }
         }
     },
     "tags": [
+        {
+            "name": "Admin Users",
+            "description": "User and role management. Requires the admin role."
+        },
+        {
+            "name": "Contact Submissions",
+            "description": "Contact form submissions. Listing and deleting require the admin role."
+        },
         {
             "name": "NextCloud Uptime Monitor",
             "description": "Endpoints for monitoring the Nextcloud uptime"

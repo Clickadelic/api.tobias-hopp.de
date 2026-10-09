@@ -8,7 +8,7 @@ use App\Mail\ContactSubmissionMail;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
-Route::get('/docs', [PageController::class, 'docs'])->name('docs');
+Route::redirect('/docs', '/api/documentation')->name('docs');
 
 Route::get('/disclaimer', [PageController::class, 'disclaimer'])->name('disclaimer');
 Route::get('/cookie-policy', [PageController::class, 'cookiepolicy'])->name('cookie-policy');
