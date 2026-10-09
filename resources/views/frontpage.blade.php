@@ -18,7 +18,7 @@
                     </code>
                 </div>
 				<div class="flex justify-center items-center gap-4 text-center">
-					<a href="/docs" class="w-full block mt-3 sm:mt-5 sm:w-55 md:w-88.75 text-gray-300 text-xs sm:text-sm text-center hover:underline">Check the Docs</a>
+					<a href="/api/documentation" class="w-full block mt-3 sm:mt-5 sm:w-55 md:w-88.75 text-gray-300 text-xs sm:text-sm text-center hover:underline">Check the Docs</a>
 				</div>
             </div>
         </div>

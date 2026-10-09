@@ -16,30 +16,35 @@ use Illuminate\Support\Facades\Password;
 use Spatie\Permission\Models\Role;
 use OpenApi\Attributes as OA;
 
-
-#[OA\Get(
-	path: "/api/auth/*",
-	summary: "Endpoints for user authentication and management",
-	tags: ["User"],
-	responses: [
-		new OA\Response(
-			response: 200,
-			description: "Successful logout of the current user from all devices"
-		)
-	]
-)]
-
 class AuthController extends Controller
 {
-	#[OA\Get(
+	#[OA\Post(
 		path: "/api/auth/register",
 		summary: "Register a new user",
 		tags: ["User"],
+		requestBody: new OA\RequestBody(
+			required: true,
+			content: new OA\JsonContent(
+				required: ["name", "email", "password", "password_confirmation"],
+				properties: [
+					new OA\Property(property: "name", type: "string", maxLength: 255, example: "Jane Doe"),
+					new OA\Property(property: "email", type: "string", format: "email", maxLength: 255, example: "jane@example.com"),
+					new OA\Property(property: "password", type: "string", format: "password", minLength: 8),
+					new OA\Property(property: "password_confirmation", type: "string", format: "password"),
+				]
+			)
+		),
 		responses: [
 			new OA\Response(
 				response: 201,
-				description: "Successful registration of a new user"
-			)
+				description: "User registered; a verification email is sent",
+				content: new OA\JsonContent(properties: [
+					new OA\Property(property: "message", type: "string", example: "Registered successfully"),
+					new OA\Property(property: "user", ref: "#/components/schemas/User"),
+					new OA\Property(property: "token", type: "string"),
+				])
+			),
+			new OA\Response(response: 422, description: "Validation error", content: new OA\JsonContent(ref: "#/components/schemas/ValidationError")),
 		]
 	)]
 	public function register(RegisterRequest $request): JsonResponse
@@ -63,15 +68,16 @@ class AuthController extends Controller
 		], 201);
 	}
 
-	#[OA\Get(
-		path: "/api/auth/resend-verification",
-		summary: "Resend email verification",
+	#[OA\Post(
+		path: "/api/auth/email/verification-notification",
+		summary: "Resend the email verification link",
+		security: [["sanctum" => []]],
 		tags: ["User"],
 		responses: [
-			new OA\Response(
-				response: 200,
-				description: "Successful resend of email verification"
-			)
+			new OA\Response(response: 200, description: "Verification email sent", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 401, description: "Unauthenticated", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 422, description: "Email address is already verified", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 429, description: "Too many requests (6 per minute)"),
 		]
 	)]
 	public function resendVerification(Request $request): JsonResponse
@@ -91,15 +97,32 @@ class AuthController extends Controller
 		]);
 	}
 
-	#[OA\Get(
+	#[OA\Post(
 		path: "/api/auth/login",
 		summary: "Login a user",
 		tags: ["User"],
+		requestBody: new OA\RequestBody(
+			required: true,
+			content: new OA\JsonContent(
+				required: ["email", "password"],
+				properties: [
+					new OA\Property(property: "email", type: "string", format: "email", example: "jane@example.com"),
+					new OA\Property(property: "password", type: "string", format: "password"),
+				]
+			)
+		),
 		responses: [
 			new OA\Response(
 				response: 200,
-				description: "Successful login of a user"
-			)
+				description: "Logged in",
+				content: new OA\JsonContent(properties: [
+					new OA\Property(property: "message", type: "string", example: "Logged in successfully"),
+					new OA\Property(property: "user", ref: "#/components/schemas/User"),
+					new OA\Property(property: "token", type: "string"),
+				])
+			),
+			new OA\Response(response: 401, description: "Invalid credentials", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 422, description: "Validation error", content: new OA\JsonContent(ref: "#/components/schemas/ValidationError")),
 		]
 	)]
 	public function login(LoginRequest $request): JsonResponse
@@ -121,15 +144,20 @@ class AuthController extends Controller
 		]);
 	}
 
-	#[OA\Get(
+	#[OA\Post(
 		path: "/api/auth/forgot-password",
 		summary: "Request a password reset link",
 		tags: ["User"],
-		responses: [
-			new OA\Response(
-				response: 200,
-				description: "Successful request for a password reset link"
+		requestBody: new OA\RequestBody(
+			required: true,
+			content: new OA\JsonContent(
+				required: ["email"],
+				properties: [new OA\Property(property: "email", type: "string", format: "email", example: "jane@example.com")]
 			)
+		),
+		responses: [
+			new OA\Response(response: 200, description: "Always returned, whether or not the account exists", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 422, description: "Validation error", content: new OA\JsonContent(ref: "#/components/schemas/ValidationError")),
 		]
 	)]
 	public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
@@ -141,15 +169,15 @@ class AuthController extends Controller
 		]);
 	}
 
-	#[OA\Get(
+	#[OA\Post(
 		path: "/api/auth/logout",
-		summary: "Logout the current user",
+		summary: "Logout the current user (revokes the current token)",
+		security: [["sanctum" => []]],
 		tags: ["User"],
 		responses: [
-			new OA\Response(
-				response: 200,
-				description: "Successful logout of the current user"
-			)
+			new OA\Response(response: 200, description: "Logged out", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 401, description: "Unauthenticated", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 403, description: "Email address not verified"),
 		]
 	)]
 	public function logout(Request $request): JsonResponse
@@ -161,15 +189,15 @@ class AuthController extends Controller
 		]);
 	}
 
-	#[OA\Get(
+	#[OA\Post(
 		path: "/api/auth/logout-all",
-		summary: "Logout the current user from all devices",
+		summary: "Logout the current user from all devices (revokes all tokens)",
+		security: [["sanctum" => []]],
 		tags: ["User"],
 		responses: [
-			new OA\Response(
-				response: 200,
-				description: "Successful logout of the current user from all devices"
-			)
+			new OA\Response(response: 200, description: "Logged out everywhere", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 401, description: "Unauthenticated", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 403, description: "Email address not verified"),
 		]
 	)]
 	public function logoutAll(Request $request): JsonResponse

@@ -11,7 +11,7 @@
 					</a>
 				</li>
                 <li>
-					<a href="/docs" class="font-medium hover:text-white hover:underline underline-offset-5 text-neutral-300 flex items-center justify-start gap-1" title="Docs">
+					<a href="/api/documentation" class="font-medium hover:text-white hover:underline underline-offset-5 text-neutral-300 flex items-center justify-start gap-1" title="Docs">
 						<x-heroicon-o-document class="size-4 -mt-0.5" />
 						Docs
 					</a>

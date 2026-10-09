@@ -19,10 +19,6 @@ class PageController extends Controller
     {
         return view('about');
     }
-    public function docs()
-    {
-        return view('docs');
-    }
     public function termsofservice()
     {
         return view('terms-of-service');

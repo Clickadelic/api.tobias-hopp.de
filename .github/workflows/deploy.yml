@@ -132,7 +132,7 @@ jobs:
                   cd "${{ secrets.DEPLOY_PATH }}"
 
                   # 1. Ordner sicherstellen (auch leer)
-                  mkdir -p storage bootstrap/cache resources/views
+                  mkdir -p storage/api-docs bootstrap/cache resources/views
                   rm -f bootstrap/cache/*.php
 
                   # 2. env-Datei
@@ -147,6 +147,7 @@ jobs:
                   php artisan key:generate --force || true
                   php artisan migrate --force
                   php artisan db:seed --force
+                  php artisan l5-swagger:generate
                   php artisan config:cache
                   php artisan route:cache
                   php artisan view:cache || true

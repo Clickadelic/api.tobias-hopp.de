@@ -15,14 +15,22 @@ use OpenApi\Attributes as OA;
 class MonitorController extends Controller
 {
 	#[OA\Get(
-		path: "/api/v1/monitor/status",
+		path: "/api/v1/monitor/nextcloud",
 		summary: "Fetch the status of the Nextcloud monitor",
+		description: "The result is cached for 30 seconds.",
+		security: [["sanctum" => []]],
 		tags: ["NextCloud Uptime Monitor"],
 		responses: [
 			new OA\Response(
 				response: 200,
-				description: "Successful fetch of the Nextcloud monitor status"
-			)
+				description: "Monitor status",
+				content: new OA\JsonContent(properties: [
+					new OA\Property(property: "online", type: "boolean"),
+					new OA\Property(property: "data", type: "object", nullable: true),
+				])
+			),
+			new OA\Response(response: 401, description: "Unauthenticated", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 403, description: "Email address not verified"),
 		]
 	)]
 	public function status()
