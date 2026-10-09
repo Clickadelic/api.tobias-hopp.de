@@ -3,11 +3,13 @@
     'index',
 ])
 
-<div class="group">
+<div class="group w-full">
     <button
         type="button"
         @click="toggle({{ $index }})"
-        class="flex w-full items-center justify-between p-3 text-left text-gray-300 font-medium bg-gray-900 rounded-lg hover:cursor-pointer hover:bg-gray-800"
+        :aria-expanded="isOpen({{ $index }})"
+        aria-controls="accordion-panel-{{ $index }}"
+        class="flex w-full items-center justify-between rounded-lg bg-gray-900 p-3 text-left font-medium text-gray-300 hover:cursor-pointer hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
     >
         <span>{{ $title }}</span>
 
@@ -21,6 +23,7 @@
     </button>
 
     <div
+        id="accordion-panel-{{ $index }}"
         x-show="isOpen({{ $index }})"
         x-collapse
         x-cloak
