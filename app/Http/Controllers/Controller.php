@@ -7,7 +7,7 @@ use OpenApi\Attributes as OA;
 #[OA\Info(
 	version: "1.0.0",
 	title: "Toby's REST-API",
-	description: "API-Documentation"
+	description: "<a href=\"/\" style=\"display: inline-block; padding: 8px 16px; background: #3f51b5; color: white; border-radius: 4px; text-decoration: none; font-weight: bold;\">← Zurück zur Hauptseite</a>"
 )]
 #[OA\SecurityScheme(
 	securityScheme: "sanctum",
