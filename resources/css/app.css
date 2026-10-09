@@ -1,17 +1,21 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@import "./google-fonts.css";
+@import './google-fonts.css';
 
 @theme {
-    --font-sans:
-        "Poppins", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    --font-la-belle-aurore: "La Belle Aurore", cursive;
+	--font-sans:
+		'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+		'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+	--font-la-belle-aurore: 'La Belle Aurore', cursive;
 
-    --color-primary: #0d6efd;
+	--color-primary: #0d6efd;
+}
+
+@layer base {
+	--color-default: #efefef;
 }
