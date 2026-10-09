@@ -3,7 +3,7 @@
 # on the target server), so this image is only meant for local development
 # (see the devstack.tobias-hopp.de repo for the full local-stack docker-compose.yml).
 
-FROM php:8.3-cli-alpine
+FROM php:8.4-cli-alpine
 
 RUN apk add --no-cache \
         git \

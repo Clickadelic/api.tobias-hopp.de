@@ -1,0 +1,194 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Toby's REST-API",
+        "description": "API-Documentation",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/auth/*": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Endpoints for user authentication and management",
+                "operationId": "78e4d0bb853f27746658e3c8c582b37f",
+                "responses": {
+                    "200": {
+                        "description": "Successful logout of the current user from all devices"
+                    }
+                }
+            }
+        },
+        "/api/auth/register": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Register a new user",
+                "operationId": "d9aab623459dddd883427e89d59f96f2",
+                "responses": {
+                    "201": {
+                        "description": "Successful registration of a new user"
+                    }
+                }
+            }
+        },
+        "/api/auth/resend-verification": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Resend email verification",
+                "operationId": "925f0ea90c85e448b647126b5be19382",
+                "responses": {
+                    "200": {
+                        "description": "Successful resend of email verification"
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Login a user",
+                "operationId": "d4bb8343c09a0c57da2be74006aabbb4",
+                "responses": {
+                    "200": {
+                        "description": "Successful login of a user"
+                    }
+                }
+            }
+        },
+        "/api/auth/forgot-password": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Request a password reset link",
+                "operationId": "416d5721941f8785405737a7b462e8e0",
+                "responses": {
+                    "200": {
+                        "description": "Successful request for a password reset link"
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Logout the current user",
+                "operationId": "90a8411aa8f7315b8ce0ebafbbbe580d",
+                "responses": {
+                    "200": {
+                        "description": "Successful logout of the current user"
+                    }
+                }
+            }
+        },
+        "/api/auth/logout-all": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Logout the current user from all devices",
+                "operationId": "cda03bf48b4f94276c2e068e52cbcd74",
+                "responses": {
+                    "200": {
+                        "description": "Successful logout of the current user from all devices"
+                    }
+                }
+            }
+        },
+        "/api/v1/unsplash/image/general": {
+            "get": {
+                "tags": [
+                    "Unsplash Images"
+                ],
+                "summary": "Fetch a general background image from Unsplash",
+                "operationId": "14041fc0ef8e8b206375b1a64f88ea50",
+                "parameters": [
+                    {
+                        "name": "collection_id, collection_ids",
+                        "in": "query",
+                        "description": "Comma-separated list of Unsplash collection IDs",
+                        "required": false,
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful fetch of a general background image from Unsplash"
+                    }
+                }
+            }
+        },
+        "/api/v1/unsplash/image/seasonal": {
+            "get": {
+                "tags": [
+                    "Unsplash Images"
+                ],
+                "summary": "Fetch a seasonal background image from Unsplash",
+                "operationId": "e4eef923b6d09339811c4eafd61a46f8",
+                "parameters": [
+                    {
+                        "name": "collection_id, collection_ids",
+                        "in": "query",
+                        "description": "Comma-separated list of Unsplash collection IDs",
+                        "required": false,
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful fetch of a seasonal background image from Unsplash"
+                    }
+                }
+            }
+        },
+        "/api/v1/monitor/status": {
+            "get": {
+                "tags": [
+                    "NextCloud Uptime Monitor"
+                ],
+                "summary": "Fetch the status of the Nextcloud monitor",
+                "operationId": "6f9efe471634bc1cac5a455d42f63c02",
+                "responses": {
+                    "200": {
+                        "description": "Successful fetch of the Nextcloud monitor status"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "NextCloud Uptime Monitor",
+            "description": "Endpoints for monitoring the Nextcloud uptime"
+        },
+        {
+            "name": "User",
+            "description": "User"
+        },
+        {
+            "name": "Unsplash Images",
+            "description": "Unsplash Images"
+        }
+    ]
+}

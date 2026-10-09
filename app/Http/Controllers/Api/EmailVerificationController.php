@@ -6,6 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 
+use OpenApi\Attributes as OA;
+
+#[OA\Tag(
+	name: "Email Verification",
+	description: "Endpoints for email verification"
+)]
 class EmailVerificationController extends Controller
 {
 	public function verify(string $id, string $hash): JsonResponse

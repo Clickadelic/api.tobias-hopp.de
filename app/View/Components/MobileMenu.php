@@ -1,12 +1,12 @@
 <?php
 
-namespace App\View\Components\layouts\sidebars;
+namespace App\View\Components;
 
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class docsSidebar extends Component
+class MobileMenu extends Component
 {
 	/**
 	 * Create a new component instance.
@@ -21,6 +21,6 @@ class docsSidebar extends Component
 	 */
 	public function render(): View|Closure|string
 	{
-		return view('components..layouts.sidebars.docs-sidebar');
+		return view('components.mobile-menu');
 	}
 }

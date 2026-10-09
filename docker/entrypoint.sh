@@ -36,6 +36,27 @@ if ! grep -q "^APP_KEY=base64:" .env 2>/dev/null; then
   php artisan key:generate --force
 fi
 
+# The shared mysql container only auto-creates the api's database on first
+# boot, so create this app's database too (idempotent, safe to run every start).
+php -r '
+$host = getenv("DB_HOST") ?: "127.0.0.1";
+$port = getenv("DB_PORT") ?: "3306";
+$db = getenv("DB_DATABASE");
+$user = getenv("DB_USERNAME") ?: "root";
+$pass = getenv("DB_PASSWORD") ?: "";
+if (!$db) { exit(0); }
+for ($i = 0; $i < 30; $i++) {
+    try {
+        $pdo = new PDO("mysql:host=$host;port=$port", $user, $pass);
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db`");
+        exit(0);
+    } catch (Throwable $e) {
+        sleep(2);
+    }
+}
+fwrite(STDERR, "create-database: giving up waiting for mysql\n");
+'
+
 attempt=1
 until php artisan migrate --force; do
   if [ "$attempt" -ge 10 ]; then
