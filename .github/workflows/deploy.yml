@@ -138,12 +138,12 @@ jobs:
                   # 2. env-Datei
                   [ -f .env ] || cp .env.template .env
 
-                  # 3. Alte Caches löschen
+                  # 3. Composer zuerst: Artisan lädt Config-Dateien, die Vendor-Klassen referenzieren können
+                  composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+                  # 4. Alte Caches löschen + Artisan
                   php artisan config:clear
                   php artisan view:clear || true
-
-                  # 4. Composer + Artisan
-                  composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
                   php artisan key:generate --force || true
                   php artisan migrate --force
                   php artisan db:seed --force
