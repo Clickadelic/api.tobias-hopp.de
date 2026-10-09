@@ -29,33 +29,33 @@
         <hr class="my-6 border-gray-700" />
         <h3 class="text-2xl mb-6">Buttons</h3>
         <div class="flex gap-3">
-            <x-button variant="default" size="md" aria-label="Conversion Button">
+            <x-ui.button variant="default" size="md" aria-label="Conversion Button">
                 Default
-            </x-button>
-            <x-button variant="primary" size="md" aria-label="Conversion Button">
+            </x-ui.button>
+            <x-ui.button variant="primary" size="md" aria-label="Conversion Button">
                 Primary
-            </x-button>
-            <x-button variant="secondary" size="md" aria-label="Conversion Button">
+            </x-ui.button>
+            <x-ui.button variant="secondary" size="md" aria-label="Conversion Button">
                 Secondary
-            </x-button>
-            <x-button variant="success" size="md" aria-label="Conversion Button">
+            </x-ui.button>
+            <x-ui.button variant="success" size="md" aria-label="Conversion Button">
                 Success
-            </x-button>
-            <x-button variant="danger" size="md" aria-label="Conversion Button">
+            </x-ui.button>
+            <x-ui.button variant="danger" size="md" aria-label="Conversion Button">
                 Danger
-            </x-button>
-            <x-button variant="warning" size="md" aria-label="Conversion Button">
+            </x-ui.button>
+            <x-ui.button variant="warning" size="md" aria-label="Conversion Button">
                 Warning
-            </x-button>
-            <x-button variant="outline" size="md" aria-label="Conversion Button">
+            </x-ui.button>
+            <x-ui.button variant="outline" size="md" aria-label="Conversion Button">
                 Outline
-            </x-button>
-            <x-button variant="ghost" size="md" aria-label="Conversion Button">
+            </x-ui.button>
+            <x-ui.button variant="ghost" size="md" aria-label="Conversion Button">
                 Ghost
-            </x-button>
-            <x-button variant="link" size="md" aria-label="Conversion Button">
+            </x-ui.button>
+            <x-ui.button variant="link" size="md" aria-label="Conversion Button">
                 Link
-            </x-button>
+            </x-ui.button>
         </div>
     </div>
 @endsection
