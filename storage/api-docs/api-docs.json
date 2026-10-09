@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Toby's REST-API",
-        "description": "API-Documentation",
+        "description": "<a href=\"/\" style=\"display: inline-block; padding: 8px 16px; background: #3f51b5; color: white; border-radius: 4px; text-decoration: none; font-weight: bold;\">← Zurück zur Hauptseite</a>",
         "version": "1.0.0"
     },
     "paths": {
