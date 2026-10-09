@@ -100,6 +100,7 @@ jobs:
                   tar \
                     --exclude=.git \
                     --exclude=.github \
+                    --exclude=bootstrap/cache \
                     --exclude=node_modules \
                     --exclude=vendor \
                     --exclude=tests \
@@ -132,6 +133,7 @@ jobs:
 
                   # 1. Ordner sicherstellen (auch leer)
                   mkdir -p storage bootstrap/cache resources/views
+                  rm -f bootstrap/cache/*.php
 
                   # 2. env-Datei
                   [ -f .env ] || cp .env.template .env

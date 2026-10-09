@@ -12,11 +12,37 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Unsplash\Exception as UnsplashException;
+use OpenApi\Attributes as OA;
 
 class BackgroundImageController extends Controller
 {
-	// GET /api/background
-	public function background(FetchUnsplashImagesRequest $request, UnsplashImageService $service): RedirectResponse|JsonResponse
+	#[OA\Get(
+		path: "/api/v1/unsplash/image/general",
+		summary: "Fetch a general background image from Unsplash",
+		parameters: [
+			new OA\Parameter(
+				name: 'collection_id, collection_ids',
+				in: 'query',
+				description: 'Comma-separated list of Unsplash collection IDs',
+				required: false,
+				explode: true,
+				schema: new OA\Schema(
+					type: 'array',
+					items: new OA\Items(
+						type: 'string'
+					)
+				)
+			)
+		],
+		tags: ["Unsplash Images"],
+		responses: [
+			new OA\Response(
+				response: 200,
+				description: "Successful fetch of a general background image from Unsplash"
+			)
+		]
+	)]
+	public function general(FetchUnsplashImagesRequest $request, UnsplashImageService $service): RedirectResponse|JsonResponse
 	{
 		$validated = $request->validated();
 		$collectionIds = $validated['collection_ids'] ?? [];
@@ -71,7 +97,32 @@ class BackgroundImageController extends Controller
 		}
 	}
 
-	// GET /api/unsplash/image/seasonal
+	#[OA\Get(
+		path: "/api/v1/unsplash/image/seasonal",
+		summary: "Fetch a seasonal background image from Unsplash",
+		parameters: [
+			new OA\Parameter(
+				name: 'collection_id, collection_ids',
+				in: 'query',
+				description: 'Comma-separated list of Unsplash collection IDs',
+				required: false,
+				explode: true,
+				schema: new OA\Schema(
+					type: 'array',
+					items: new OA\Items(
+						type: 'string'
+					)
+				)
+			)
+		],
+		tags: ["Unsplash Images"],
+		responses: [
+			new OA\Response(
+				response: 200,
+				description: "Successful fetch of a seasonal background image from Unsplash"
+			)
+		]
+	)]
 	public function seasonal(Request $request, UnsplashImageService $service): RedirectResponse|JsonResponse
 	{
 		$seasonParam = strtolower((string) $request->query('season', ''));
