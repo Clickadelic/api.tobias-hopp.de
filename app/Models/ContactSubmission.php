@@ -18,4 +18,15 @@ class ContactSubmission extends BaseModel
 		'subject',
 		'message',
 	];
+
+	protected $attributes = [
+		'is_read' => false,
+	];
+
+	protected function casts(): array
+	{
+		return [
+			'is_read' => 'boolean',
+		];
+	}
 }
