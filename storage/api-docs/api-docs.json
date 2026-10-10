@@ -842,10 +842,11 @@
                     {
                         "name": "contactSubmission",
                         "in": "path",
-                        "description": "Contact submission ID",
+                        "description": "Contact submission UUID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
@@ -876,6 +877,87 @@
                     },
                     "404": {
                         "description": "Submission not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Contact Submissions"
+                ],
+                "summary": "Mark a contact submission as read/unread (admin)",
+                "description": "Update the specified resource in storage.",
+                "operationId": "7838ab31f1b0b82652c4c715fd09453c",
+                "parameters": [
+                    {
+                        "name": "contactSubmission",
+                        "in": "path",
+                        "description": "Contact submission UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_read"
+                                ],
+                                "properties": {
+                                    "is_read": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated submission",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ContactSubmission"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Message"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not an admin or email not verified"
+                    },
+                    "404": {
+                        "description": "Submission not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1036,9 +1118,9 @@
             },
             "ContactSubmission": {
                 "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
+                    "uuid": {
+                        "type": "string",
+                        "format": "uuid"
                     },
                     "name": {
                         "type": "string"
@@ -1056,6 +1138,10 @@
                     },
                     "message": {
                         "type": "string"
+                    },
+                    "is_read": {
+                        "description": "Server-managed; always false on creation.",
+                        "type": "boolean"
                     },
                     "created_at": {
                         "type": "string",

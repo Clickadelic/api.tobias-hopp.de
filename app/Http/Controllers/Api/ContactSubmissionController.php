@@ -117,9 +117,30 @@ class ContactSubmissionController extends Controller
 	/**
 	 * Update the specified resource in storage.
 	 */
+	#[OA\Patch(
+		path: "/api/v1/contact-submissions/{contactSubmission}",
+		summary: "Mark a contact submission as read/unread (admin)",
+		security: [["sanctum" => []]],
+		tags: ["Contact Submissions"],
+		parameters: [
+			new OA\Parameter(name: "contactSubmission", in: "path", required: true, description: "Contact submission UUID", schema: new OA\Schema(type: "string", format: "uuid")),
+		],
+		requestBody: new OA\RequestBody(
+			required: true,
+			content: new OA\JsonContent(required: ["is_read"], properties: [new OA\Property(property: "is_read", type: "boolean")])
+		),
+		responses: [
+			new OA\Response(response: 200, description: "Updated submission", content: new OA\JsonContent(ref: "#/components/schemas/ContactSubmission")),
+			new OA\Response(response: 401, description: "Unauthenticated", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 403, description: "Not an admin or email not verified"),
+			new OA\Response(response: 404, description: "Submission not found"),
+			new OA\Response(response: 422, description: "Validation error", content: new OA\JsonContent(ref: "#/components/schemas/ValidationError")),
+		]
+	)]
 	public function update(UpdateContactSubmissionRequest $request, ContactSubmission $contactSubmission)
 	{
-		//
+		$contactSubmission->update($request->validated());
+		return response()->json($contactSubmission);
 	}
 
 	/**
@@ -131,7 +152,7 @@ class ContactSubmissionController extends Controller
 		security: [["sanctum" => []]],
 		tags: ["Contact Submissions"],
 		parameters: [
-			new OA\Parameter(name: "contactSubmission", in: "path", required: true, description: "Contact submission ID", schema: new OA\Schema(type: "integer")),
+			new OA\Parameter(name: "contactSubmission", in: "path", required: true, description: "Contact submission UUID", schema: new OA\Schema(type: "string", format: "uuid")),
 		],
 		responses: [
 			new OA\Response(response: 200, description: "Deleted", content: new OA\JsonContent(type: "string", example: "Deleted")),

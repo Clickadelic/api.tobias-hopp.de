@@ -43,12 +43,13 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
 	schema: "ContactSubmission",
 	properties: [
-		new OA\Property(property: "id", type: "integer", example: 1),
+		new OA\Property(property: "uuid", type: "string", format: "uuid"),
 		new OA\Property(property: "name", type: "string"),
 		new OA\Property(property: "phone", type: "string", nullable: true),
 		new OA\Property(property: "email", type: "string", format: "email"),
 		new OA\Property(property: "subject", type: "string"),
 		new OA\Property(property: "message", type: "string"),
+		new OA\Property(property: "is_read", type: "boolean", description: "Server-managed; always false on creation."),
 		new OA\Property(property: "created_at", type: "string", format: "date-time"),
 		new OA\Property(property: "updated_at", type: "string", format: "date-time"),
 	]
