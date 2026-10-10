@@ -10,6 +10,7 @@ use App\Http\Requests\StoreContactSubmissionRequest;
 use App\Http\Requests\UpdateContactSubmissionRequest;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ContactSubmissionMail;
+use App\Mail\ContactSubmissionNotificationMail;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
@@ -91,8 +92,12 @@ class ContactSubmissionController extends Controller
 	)]
 	public function store(StoreContactSubmissionRequest $request)
 	{
-		ContactSubmission::create($request->validated());
-		Mail::to(config('mail.from.address'))
+		$contactSubmission = ContactSubmission::create($request->validated());
+
+		Mail::to('mail@tobias-hopp.de')
+			->queue(new ContactSubmissionNotificationMail($contactSubmission));
+
+		Mail::to($contactSubmission->email)
 			->queue(new ContactSubmissionMail());
 
 		return response()->json("OK", 201);

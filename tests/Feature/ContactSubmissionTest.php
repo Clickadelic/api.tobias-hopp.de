@@ -2,6 +2,8 @@
 
 use App\Models\ContactSubmission;
 use App\Models\User;
+use App\Mail\ContactSubmissionMail;
+use App\Mail\ContactSubmissionNotificationMail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
@@ -36,6 +38,9 @@ it('saves a contact submission request', function () {
 		->assertCreated();
 
 	expect(ContactSubmission::query()->where('email', $postData['email'])->exists())->toBeTrue();
+
+	Mail::assertQueued(ContactSubmissionNotificationMail::class, fn ($mail) => $mail->hasTo('mail@tobias-hopp.de'));
+	Mail::assertQueued(ContactSubmissionMail::class, fn ($mail) => $mail->hasTo($postData['email']));
 });
 
 it('rejects regular users from viewing contact submissions', function () {
