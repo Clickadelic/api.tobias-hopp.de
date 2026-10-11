@@ -18,7 +18,11 @@ class ContactSubmissionFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => fake()->name(),
+            'phone' => fake()->phoneNumber(),
+            'email' => fake()->safeEmail(),
+            'subject' => fake()->sentence(),
+            'message' => fake()->paragraph(),
         ];
     }
 }
