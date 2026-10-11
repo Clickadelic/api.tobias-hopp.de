@@ -17,6 +17,7 @@ class ContactSubmission extends BaseModel
 		'email',
 		'subject',
 		'message',
+		'is_read',
 	];
 
 	protected $attributes = [
