@@ -154,4 +154,10 @@ jobs:
 
                   php artisan storage:link || true
                   chmod -R ug+rwx storage bootstrap/cache || true
+
+                  # 5. Cleanup: Dev-/Build-only Dateien entfernen (Assets liegen bereits in public/build)
+                  rm -rf .agents .codex .vscode docker node_modules tests x-files resources/js resources/css
+                  rm -f .dockerignore .editorconfig .env.dev .env.prod .gitattributes .gitignore .prettierrc \
+                        AGENTS.md boost.json Dockerfile package.json package-lock.json phpunit.xml \
+                        README.md vite.config.js warp.md
                   EOF
