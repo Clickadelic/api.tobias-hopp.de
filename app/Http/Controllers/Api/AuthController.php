@@ -7,11 +7,13 @@ use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Mail\NewUserRegisteredMail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Spatie\Permission\Models\Role;
 use OpenApi\Attributes as OA;
@@ -57,6 +59,13 @@ class AuthController extends Controller
 			$user->sendEmailVerificationNotification();
 		} catch (\Throwable $e) {
 			Log::warning('Verification email could not be sent.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+		}
+
+		// An undeliverable admin notification shouldn't fail the whole registration.
+		try {
+			Mail::to(config('mail.admin_address'))->queue(new NewUserRegisteredMail($user));
+		} catch (\Throwable $e) {
+			Log::warning('Admin registration notification could not be sent.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
 		}
 
 		$token = $user->createToken('api-token')->plainTextToken;
