@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\ContactSubmission;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -17,7 +18,7 @@ class ContactSubmissionMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(public ContactSubmission $contactSubmission)
     {
         //
     }
@@ -28,7 +29,7 @@ class ContactSubmissionMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Contact Submission Mail',
+            subject: 'Thank you for your message!',
         );
     }
 

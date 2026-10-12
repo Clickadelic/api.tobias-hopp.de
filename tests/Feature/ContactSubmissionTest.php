@@ -1,5 +1,7 @@
 <?php
 
+use App\Mail\ContactSubmissionAdminMail;
+use App\Mail\ContactSubmissionMail;
 use App\Models\ContactSubmission;
 use App\Models\User;
 use App\Mail\ContactSubmissionMail;
@@ -39,8 +41,13 @@ it('saves a contact submission request', function () {
 
 	expect(ContactSubmission::query()->where('email', $postData['email'])->exists())->toBeTrue();
 
-	Mail::assertQueued(ContactSubmissionNotificationMail::class, fn ($mail) => $mail->hasTo('mail@tobias-hopp.de'));
-	Mail::assertQueued(ContactSubmissionMail::class, fn ($mail) => $mail->hasTo($postData['email']));
+	Mail::assertQueued(ContactSubmissionMail::class, function ($mail) use ($postData) {
+		return $mail->hasTo($postData['email']);
+	});
+
+	Mail::assertQueued(ContactSubmissionAdminMail::class, function ($mail) {
+		return $mail->hasTo(config('mail.admin_address'));
+	});
 });
 
 it('rejects regular users from viewing contact submissions', function () {

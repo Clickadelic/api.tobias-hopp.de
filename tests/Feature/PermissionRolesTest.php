@@ -3,11 +3,15 @@
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 test('new registrations receive the user role', function () {
+	Notification::fake();
+	Mail::fake();
 	Role::create(['name' => 'user', 'guard_name' => 'web']);
 
 	$response = $this->postJson('/api/auth/register', [
