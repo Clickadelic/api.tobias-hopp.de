@@ -48,6 +48,22 @@ it('saves a contact submission request', function () {
     });
 });
 
+it('renders contact submission confirmation email with a copy of the message', function () {
+    $submission = new ContactSubmission([
+        'name' => 'Alice Test',
+        'email' => 'alice@example.com',
+        'phone' => '+49 12345678',
+        'subject' => 'Project Inquiry',
+        'message' => 'This is my detailed inquiry message.',
+    ]);
+
+    $mailable = new ContactSubmissionMail($submission);
+
+    $mailable->assertSeeInHtml('Project Inquiry');
+    $mailable->assertSeeInHtml('This is my detailed inquiry message.');
+    $mailable->assertSeeInHtml('+49 12345678');
+});
+
 it('saves a contact submission request via singular endpoint', function () {
     Mail::fake();
 
