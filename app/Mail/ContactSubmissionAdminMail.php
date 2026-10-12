@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\ContactSubmission;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -28,6 +29,9 @@ class ContactSubmissionAdminMail extends Mailable
     {
         return new Envelope(
             subject: 'New contact submission: '.$this->contactSubmission->subject,
+            replyTo: [
+                new Address($this->contactSubmission->email, $this->contactSubmission->name),
+            ],
         );
     }
 
