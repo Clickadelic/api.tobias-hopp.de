@@ -1,184 +1,203 @@
 <?php
 
 // Eigenen Namespace deklarieren
+
 namespace App\Http\Controllers\Api;
 
 // Verwendung der benötigten Controller-Klasse als Basis bzw. deren Verwendung
 use App\Http\Controllers\Controller;
-use App\Models\ContactSubmission;
 use App\Http\Requests\StoreContactSubmissionRequest;
 use App\Http\Requests\UpdateContactSubmissionRequest;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ContactSubmissionMail;
 use App\Mail\ContactSubmissionAdminMail;
+use App\Mail\ContactSubmissionMail;
+use App\Models\ContactSubmission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use OpenApi\Attributes as OA;
 
-#[OA\Tag(name: "Contact Submissions", description: "Contact form submissions. Listing and deleting require the admin role.")]
+#[OA\Tag(name: 'Contact Submissions', description: 'Contact form submissions. Listing and deleting require the admin role.')]
 class ContactSubmissionController extends Controller
 {
-	/**
-	 * Display a listing of the resource.
-	 */
-	#[OA\Get(
-		path: "/api/v1/contact-submissions",
-		summary: "List contact submissions (admin)",
-		security: [["sanctum" => []]],
-		tags: ["Contact Submissions"],
-		parameters: [
-			new OA\Parameter(name: "per_page", in: "query", description: "Items per page (clamped to 1-50).", schema: new OA\Schema(type: "integer", minimum: 1, maximum: 50, default: 10)),
-			new OA\Parameter(name: "page", in: "query", description: "Page number.", schema: new OA\Schema(type: "integer", minimum: 1, default: 1)),
-		],
-		responses: [
-			new OA\Response(
-				response: 200,
-				description: "Paginated submissions, newest first",
-				content: new OA\JsonContent(properties: [
-					new OA\Property(property: "current_page", type: "integer"),
-					new OA\Property(property: "data", type: "array", items: new OA\Items(ref: "#/components/schemas/ContactSubmission")),
-					new OA\Property(property: "per_page", type: "integer"),
-					new OA\Property(property: "total", type: "integer"),
-					new OA\Property(property: "last_page", type: "integer"),
-				])
-			),
-			new OA\Response(response: 401, description: "Unauthenticated", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
-			new OA\Response(response: 403, description: "Not an admin or email not verified"),
-		]
-	)]
-	public function index(Request $request)
-	{
-		$perPage = min(max((int) $request->query('per_page', 10), 1), 50);
-		$contacts = ContactSubmission::query()
-			->latest()
-			->paginate($perPage)
-			->withQueryString();
+    /**
+     * Display a listing of the resource.
+     */
+    #[OA\Get(
+        path: '/api/v1/contact-submissions',
+        summary: 'List contact submissions (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Contact Submissions'],
+        parameters: [
+            new OA\Parameter(name: 'per_page', in: 'query', description: 'Items per page (clamped to 1-50).', schema: new OA\Schema(type: 'integer', minimum: 1, maximum: 50, default: 10)),
+            new OA\Parameter(name: 'page', in: 'query', description: 'Page number.', schema: new OA\Schema(type: 'integer', minimum: 1, default: 1)),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Paginated submissions, newest first',
+                content: new OA\JsonContent(properties: [
+                    new OA\Property(property: 'current_page', type: 'integer'),
+                    new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/ContactSubmission')),
+                    new OA\Property(property: 'per_page', type: 'integer'),
+                    new OA\Property(property: 'total', type: 'integer'),
+                    new OA\Property(property: 'last_page', type: 'integer'),
+                ])
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/Message')),
+            new OA\Response(response: 403, description: 'Not an admin or email not verified'),
+        ]
+    )]
+    public function index(Request $request)
+    {
+        $perPage = min(max((int) $request->query('per_page', 10), 1), 50);
+        $contacts = ContactSubmission::query()
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
 
-		return response()->json($contacts);
-	}
+        return response()->json($contacts);
+    }
 
-	/**
-	 * Show the form for creating a new resource.
-	 */
-	public function create()
-	{
-		//
-	}
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
 
-	/**
-	 * Store a newly created resource in storage.
-	 */
-	#[OA\Post(
-		path: "/api/v1/contact-submissions",
-		summary: "Submit the contact form",
-		description: "Public endpoint. Stores the submission and queues a notification email.",
-		tags: ["Contact Submissions"],
-		requestBody: new OA\RequestBody(
-			required: true,
-			content: new OA\JsonContent(
-				required: ["name", "email", "subject", "message"],
-				properties: [
-					new OA\Property(property: "name", type: "string", maxLength: 255),
-					new OA\Property(property: "phone", type: "string", maxLength: 255, nullable: true),
-					new OA\Property(property: "email", type: "string", format: "email", maxLength: 255),
-					new OA\Property(property: "subject", type: "string", maxLength: 255),
-					new OA\Property(property: "message", type: "string"),
-				]
-			)
-		),
-		responses: [
-			new OA\Response(response: 201, description: "Submission stored", content: new OA\JsonContent(type: "string", example: "OK")),
-			new OA\Response(response: 422, description: "Validation error", content: new OA\JsonContent(ref: "#/components/schemas/ValidationError")),
-		]
-	)]
-	public function store(StoreContactSubmissionRequest $request)
-	{
-		$contactSubmission = ContactSubmission::create($request->validated());
+    /**
+     * Store a newly created resource in storage.
+     */
+    #[OA\Post(
+        path: '/api/v1/contact-submissions',
+        summary: 'Submit the contact form',
+        description: 'Public endpoint. Stores the submission and queues a notification email.',
+        tags: ['Contact Submissions'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name', 'email', 'subject', 'message'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'phone', type: 'string', maxLength: 255, nullable: true),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', maxLength: 255),
+                    new OA\Property(property: 'subject', type: 'string', maxLength: 255),
+                    new OA\Property(property: 'message', type: 'string'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Submission stored', content: new OA\JsonContent(type: 'string', example: 'OK')),
+            new OA\Response(response: 422, description: 'Validation error', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+        ]
+    )]
+    public function store(StoreContactSubmissionRequest $request)
+    {
+        $contactSubmission = ContactSubmission::create($request->validated());
 
-		// Thank-you email to the person who submitted the form.
-		Mail::to($contactSubmission->email)
-			->queue(new ContactSubmissionMail($contactSubmission));
+        // Thank-you email to the person who submitted the form.
+        try {
+            Mail::to($contactSubmission->email)
+                ->queue(new ContactSubmissionMail($contactSubmission));
+        } catch (\Throwable $e) {
+            Log::error('Failed sending contact submission confirmation email: '.$e->getMessage(), [
+                'email' => $contactSubmission->email,
+            ]);
+        }
 
-		// Notification email to the admin mailbox.
-		Mail::to(config('mail.admin_address'))
-			->queue(new ContactSubmissionAdminMail($contactSubmission));
+        // Notification email to the admin mailbox.
+        try {
+            $adminAddress = config('mail.admin_address');
+            if ($adminAddress) {
+                Mail::to($adminAddress)
+                    ->queue(new ContactSubmissionAdminMail($contactSubmission));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Failed sending contact submission admin email: '.$e->getMessage(), [
+                'admin_email' => config('mail.admin_address'),
+            ]);
+        }
 
-		return response()->json("OK", 201);
-	}
+        return response()->json('OK', 201);
+    }
 
-	/**
-	 * Display the specified resource.
-	 */
-	public function show(ContactSubmission $contactSubmission)
-	{
-		//
-	}
+    /**
+     * Display the specified resource.
+     */
+    public function show(ContactSubmission $contactSubmission)
+    {
+        //
+    }
 
-	/**
-	 * Show the form for editing the specified resource.
-	 */
-	public function edit(ContactSubmission $contactSubmission)
-	{
-		//
-	}
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(ContactSubmission $contactSubmission)
+    {
+        //
+    }
 
-	/**
-	 * Update the specified resource in storage.
-	 */
-	#[OA\Patch(
-		path: "/api/v1/contact-submissions/{contactSubmission}",
-		summary: "Mark a contact submission as read/unread (admin)",
-		security: [["sanctum" => []]],
-		tags: ["Contact Submissions"],
-		parameters: [
-			new OA\Parameter(name: "contactSubmission", in: "path", required: true, description: "Contact submission UUID", schema: new OA\Schema(type: "string", format: "uuid")),
-		],
-		requestBody: new OA\RequestBody(
-			required: true,
-			content: new OA\JsonContent(required: ["is_read"], properties: [new OA\Property(property: "is_read", type: "boolean")])
-		),
-		responses: [
-			new OA\Response(response: 200, description: "Updated submission", content: new OA\JsonContent(ref: "#/components/schemas/ContactSubmission")),
-			new OA\Response(response: 401, description: "Unauthenticated", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
-			new OA\Response(response: 403, description: "Not an admin or email not verified"),
-			new OA\Response(response: 404, description: "Submission not found"),
-			new OA\Response(response: 422, description: "Validation error", content: new OA\JsonContent(ref: "#/components/schemas/ValidationError")),
-		]
-	)]
-	public function update(UpdateContactSubmissionRequest $request, ContactSubmission $contactSubmission)
-	{
-		$contactSubmission->update($request->validated());
-		return response()->json($contactSubmission);
-	}
+    /**
+     * Update the specified resource in storage.
+     */
+    #[OA\Patch(
+        path: '/api/v1/contact-submissions/{contactSubmission}',
+        summary: 'Mark a contact submission as read/unread (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Contact Submissions'],
+        parameters: [
+            new OA\Parameter(name: 'contactSubmission', in: 'path', required: true, description: 'Contact submission UUID', schema: new OA\Schema(type: 'string', format: 'uuid')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(required: ['is_read'], properties: [new OA\Property(property: 'is_read', type: 'boolean')])
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Updated submission', content: new OA\JsonContent(ref: '#/components/schemas/ContactSubmission')),
+            new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/Message')),
+            new OA\Response(response: 403, description: 'Not an admin or email not verified'),
+            new OA\Response(response: 404, description: 'Submission not found'),
+            new OA\Response(response: 422, description: 'Validation error', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+        ]
+    )]
+    public function update(UpdateContactSubmissionRequest $request, ContactSubmission $contactSubmission)
+    {
+        $contactSubmission->update($request->validated());
 
-	/**
-	 * Remove the specified resource from storage.
-	 */
-	#[OA\Delete(
-		path: "/api/v1/contact-submissions/{contactSubmission}",
-		summary: "Delete a contact submission (admin)",
-		security: [["sanctum" => []]],
-		tags: ["Contact Submissions"],
-		parameters: [
-			new OA\Parameter(name: "contactSubmission", in: "path", required: true, description: "Contact submission UUID", schema: new OA\Schema(type: "string", format: "uuid")),
-		],
-		responses: [
-			new OA\Response(response: 200, description: "Deleted", content: new OA\JsonContent(type: "string", example: "Deleted")),
-			new OA\Response(response: 401, description: "Unauthenticated", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
-			new OA\Response(response: 403, description: "Not an admin or email not verified"),
-			new OA\Response(response: 404, description: "Submission not found"),
-		]
-	)]
-	public function destroy(ContactSubmission $contactSubmission)
-	{
-		$contactSubmission->delete();
-		return response()->json("Deleted", 200);
-	}
+        return response()->json($contactSubmission);
+    }
 
-	public function sendEmail(ContactSubmission $contactSubmission)
-	{
-		Mail::to($contactSubmission->email)
-			->queue(new ContactSubmissionMail($contactSubmission));
+    /**
+     * Remove the specified resource from storage.
+     */
+    #[OA\Delete(
+        path: '/api/v1/contact-submissions/{contactSubmission}',
+        summary: 'Delete a contact submission (admin)',
+        security: [['sanctum' => []]],
+        tags: ['Contact Submissions'],
+        parameters: [
+            new OA\Parameter(name: 'contactSubmission', in: 'path', required: true, description: 'Contact submission UUID', schema: new OA\Schema(type: 'string', format: 'uuid')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Deleted', content: new OA\JsonContent(type: 'string', example: 'Deleted')),
+            new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/Message')),
+            new OA\Response(response: 403, description: 'Not an admin or email not verified'),
+            new OA\Response(response: 404, description: 'Submission not found'),
+        ]
+    )]
+    public function destroy(ContactSubmission $contactSubmission)
+    {
+        $contactSubmission->delete();
 
-		return response()->json("Email Sent", 200);
-	}
+        return response()->json('Deleted', 200);
+    }
+
+    public function sendEmail(ContactSubmission $contactSubmission)
+    {
+        Mail::to($contactSubmission->email)
+            ->queue(new ContactSubmissionMail($contactSubmission));
+
+        return response()->json('Email Sent', 200);
+    }
 }

@@ -15,55 +15,87 @@ use function Pest\Laravel\postJson;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-	Config::set('app.debug', true);
+    Config::set('app.debug', true);
 });
 
 it('rejects unauthenticated requests to the contact submissions index', function () {
-	getJson('/api/v1/contact-submissions')
-		->assertUnauthorized();
+    getJson('/api/v1/contact-submissions')
+        ->assertUnauthorized();
 });
 
 it('saves a contact submission request', function () {
-	Mail::fake();
+    Mail::fake();
 
-	$postData = [
-		'name' => 'John Doe',
-		'phone' => '1234567890',
-		'email' => 'TbI9o@example.com',
-		'subject' => 'Test Subject',
-		'message' => 'Hello, this is a test message.',
-	];
+    $postData = [
+        'name' => 'John Doe',
+        'phone' => '1234567890',
+        'email' => 'TbI9o@example.com',
+        'subject' => 'Test Subject',
+        'message' => 'Hello, this is a test message.',
+    ];
 
-	postJson('/api/v1/contact-submissions', $postData)
-		->assertCreated();
+    postJson('/api/v1/contact-submissions', $postData)
+        ->assertCreated();
 
-	expect(ContactSubmission::query()->where('email', $postData['email'])->exists())->toBeTrue();
+    expect(ContactSubmission::query()->where('email', $postData['email'])->exists())->toBeTrue();
 
-	Mail::assertQueued(ContactSubmissionMail::class, function ($mail) use ($postData) {
-		return $mail->hasTo($postData['email']);
-	});
+    Mail::assertQueued(ContactSubmissionMail::class, function ($mail) use ($postData) {
+        return $mail->hasTo($postData['email']);
+    });
 
-	Mail::assertQueued(ContactSubmissionAdminMail::class, function ($mail) {
-		return $mail->hasTo(config('mail.admin_address'));
-	});
+    Mail::assertQueued(ContactSubmissionAdminMail::class, function ($mail) {
+        return $mail->hasTo(config('mail.admin_address'));
+    });
+});
+
+it('renders contact submission confirmation email with a copy of the message', function () {
+    $submission = new ContactSubmission([
+        'name' => 'Alice Test',
+        'email' => 'alice@example.com',
+        'phone' => '+49 12345678',
+        'subject' => 'Project Inquiry',
+        'message' => 'This is my detailed inquiry message.',
+    ]);
+
+    $mailable = new ContactSubmissionMail($submission);
+
+    $mailable->assertSeeInHtml('Project Inquiry');
+    $mailable->assertSeeInHtml('This is my detailed inquiry message.');
+    $mailable->assertSeeInHtml('+49 12345678');
+});
+
+it('saves a contact submission request via singular endpoint', function () {
+    Mail::fake();
+
+    $postData = [
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'subject' => 'Singular Route Test',
+        'message' => 'Testing singular route.',
+    ];
+
+    postJson('/api/v1/contact-submission', $postData)
+        ->assertCreated();
+
+    expect(ContactSubmission::query()->where('email', $postData['email'])->exists())->toBeTrue();
 });
 
 it('rejects regular users from viewing contact submissions', function () {
-	Role::create(['name' => 'user', 'guard_name' => 'web']);
-	$regularUser = User::factory()->create();
-	$regularUser->assignRole('user');
+    Role::create(['name' => 'user', 'guard_name' => 'web']);
+    $regularUser = User::factory()->create();
+    $regularUser->assignRole('user');
 
-	$this->actingAs($regularUser, 'sanctum')
-		->getJson('/api/v1/contact-submissions')
-		->assertForbidden();
+    $this->actingAs($regularUser, 'sanctum')
+        ->getJson('/api/v1/contact-submissions')
+        ->assertForbidden();
 });
 
 it('allows admins to view contact submissions', function () {
-	Role::create(['name' => 'admin', 'guard_name' => 'web']);
-	$admin = User::factory()->create();
-	$admin->assignRole('admin');
+    Role::create(['name' => 'admin', 'guard_name' => 'web']);
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
 
-	$this->actingAs($admin, 'sanctum')
-		->getJson('/api/v1/contact-submissions')
-		->assertOk();
+    $this->actingAs($admin, 'sanctum')
+        ->getJson('/api/v1/contact-submissions')
+        ->assertOk();
 });
