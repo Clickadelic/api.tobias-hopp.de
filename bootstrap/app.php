@@ -12,6 +12,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\SetCacheHeaders;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Routing\Middleware\ValidateSignature;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -56,5 +57,19 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return response('Unauthenticated.', 401);
+        });
+
+        // A tampered or expired email verification link fails signature validation
+        // before it reaches the controller; render the same branded page for it.
+        $exceptions->render(function (InvalidSignatureException $exception, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return null;
+            }
+
+            if ($request->routeIs('verification.verify')) {
+                return response()->view('auth.email-verification-failed', [], 403);
+            }
+
+            return null;
         });
     })->create();
