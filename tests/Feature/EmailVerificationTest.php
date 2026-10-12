@@ -1,9 +1,11 @@
 <?php
 
+use App\Mail\NewUserRegisteredMail;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Spatie\Permission\Models\Role;
@@ -12,6 +14,7 @@ uses(RefreshDatabase::class);
 
 it('sends a verification notification when a user registers', function () {
     Notification::fake();
+    Mail::fake();
     Role::where('name', 'user')->where('guard_name', 'web')->delete();
 
     $response = $this->postJson('/api/auth/register', [
@@ -25,6 +28,10 @@ it('sends a verification notification when a user registers', function () {
         ->assertJsonPath('user.email_verified_at', null);
 
     Notification::assertSentTo(User::first(), VerifyEmail::class);
+
+    Mail::assertQueued(NewUserRegisteredMail::class, function ($mail) {
+        return $mail->hasTo(config('mail.admin_address'));
+    });
 });
 
 it('requires verified email addresses for protected api routes', function () {

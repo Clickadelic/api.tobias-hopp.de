@@ -10,6 +10,7 @@ use App\Http\Requests\StoreContactSubmissionRequest;
 use App\Http\Requests\UpdateContactSubmissionRequest;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ContactSubmissionMail;
+use App\Mail\ContactSubmissionAdminMail;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
@@ -91,9 +92,15 @@ class ContactSubmissionController extends Controller
 	)]
 	public function store(StoreContactSubmissionRequest $request)
 	{
-		ContactSubmission::create($request->validated());
-		Mail::to(config('mail.from.address'))
-			->queue(new ContactSubmissionMail());
+		$contactSubmission = ContactSubmission::create($request->validated());
+
+		// Thank-you email to the person who submitted the form.
+		Mail::to($contactSubmission->email)
+			->queue(new ContactSubmissionMail($contactSubmission));
+
+		// Notification email to the admin mailbox.
+		Mail::to(config('mail.admin_address'))
+			->queue(new ContactSubmissionAdminMail($contactSubmission));
 
 		return response()->json("OK", 201);
 	}
@@ -169,7 +176,7 @@ class ContactSubmissionController extends Controller
 
 	public function sendEmail(ContactSubmission $contactSubmission)
 	{
-		Mail::to(config('mail.from.address'))
+		Mail::to($contactSubmission->email)
 			->queue(new ContactSubmissionMail($contactSubmission));
 
 		return response()->json("Email Sent", 200);

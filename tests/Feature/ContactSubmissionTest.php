@@ -1,5 +1,7 @@
 <?php
 
+use App\Mail\ContactSubmissionAdminMail;
+use App\Mail\ContactSubmissionMail;
 use App\Models\ContactSubmission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,6 +38,14 @@ it('saves a contact submission request', function () {
 		->assertCreated();
 
 	expect(ContactSubmission::query()->where('email', $postData['email'])->exists())->toBeTrue();
+
+	Mail::assertQueued(ContactSubmissionMail::class, function ($mail) use ($postData) {
+		return $mail->hasTo($postData['email']);
+	});
+
+	Mail::assertQueued(ContactSubmissionAdminMail::class, function ($mail) {
+		return $mail->hasTo(config('mail.admin_address'));
+	});
 });
 
 it('rejects regular users from viewing contact submissions', function () {
