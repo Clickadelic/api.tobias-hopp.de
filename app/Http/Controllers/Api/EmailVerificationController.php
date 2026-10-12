@@ -4,29 +4,45 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
-
+use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-	name: "Email Verification",
-	description: "Endpoints for email verification"
+    name: 'Email Verification',
+    description: 'Endpoints for email verification'
 )]
 class EmailVerificationController extends Controller
 {
-	public function verify(string $id, string $hash): JsonResponse
-	{
-		$user = User::findOrFail($id);
+    public function verify(Request $request, string $id, string $hash): JsonResponse|View
+    {
+        $user = User::find($id);
 
-		abort_unless(hash_equals(sha1($user->getEmailForVerification()), $hash), 403);
+        if (! $user || ! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+            if ($request->wantsJson()) {
+                abort(403);
+            }
 
-		if (! $user->hasVerifiedEmail()) {
-			$user->markEmailAsVerified();
-		}
+            return response()->view('auth.email-verification-failed', [], 403);
+        }
 
-		return response()->json([
-			'message' => 'Email address verified successfully.',
-			'email_verified' => true,
-		]);
-	}
+        $alreadyVerified = $user->hasVerifiedEmail();
+
+        if (! $alreadyVerified) {
+            $user->markEmailAsVerified();
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Email address verified successfully.',
+                'email_verified' => true,
+            ]);
+        }
+
+        return view('auth.email-verified', [
+            'user' => $user,
+            'alreadyVerified' => $alreadyVerified,
+        ]);
+    }
 }
