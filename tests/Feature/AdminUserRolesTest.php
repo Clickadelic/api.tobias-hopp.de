@@ -56,3 +56,56 @@ test('admins cannot remove their own admin role', function () {
 		->patchJson("/api/v1/users/{$admin->id}/role", ['role' => 'user'])
 		->assertUnprocessable();
 });
+
+test('admins can delete other users', function () {
+	$admin = User::factory()->create();
+	$admin->assignRole('admin');
+	$user = User::factory()->create();
+	$user->assignRole('user');
+
+	$this->actingAs($admin, 'sanctum')
+		->deleteJson("/api/v1/users/{$user->id}")
+		->assertOk();
+
+	$this->assertDatabaseMissing('users', ['id' => $user->id]);
+});
+
+test('admins cannot delete their own account', function () {
+	$admin = User::factory()->create();
+	$admin->assignRole('admin');
+
+	$this->actingAs($admin, 'sanctum')
+		->deleteJson("/api/v1/users/{$admin->id}")
+		->assertUnprocessable();
+
+	$this->assertDatabaseHas('users', ['id' => $admin->id]);
+});
+
+test('regular users cannot delete users', function () {
+	$user = User::factory()->create();
+	$user->assignRole('user');
+	$other = User::factory()->create();
+	$other->assignRole('user');
+
+	$this->actingAs($user, 'sanctum')
+		->deleteJson("/api/v1/users/{$other->id}")
+		->assertForbidden();
+
+	$this->assertDatabaseHas('users', ['id' => $other->id]);
+});
+
+test('regular users cannot list users', function () {
+	$user = User::factory()->create();
+	$user->assignRole('user');
+
+	$this->actingAs($user, 'sanctum')->getJson('/api/v1/users')->assertForbidden();
+});
+
+test('guests cannot use the admin user endpoints', function () {
+	$user = User::factory()->create();
+
+	$this->getJson('/api/v1/users')->assertUnauthorized();
+	$this->patchJson("/api/v1/users/{$user->id}/role", ['role' => 'admin'])->assertUnauthorized();
+	$this->deleteJson("/api/v1/users/{$user->id}")->assertUnauthorized();
+	$this->assertDatabaseHas('users', ['id' => $user->id]);
+});
