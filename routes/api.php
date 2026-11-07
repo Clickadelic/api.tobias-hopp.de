@@ -51,20 +51,13 @@ Route::prefix('v1')->group(function () {
 			Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
 			Route::get('users', [AdminUserController::class, 'index']);
 			Route::patch('users/{user}/role', [AdminUserController::class, 'updateRole']);
-<<<<<<< Updated upstream
 			Route::delete('users/{user}', [AdminUserController::class, 'destroy']);
-=======
->>>>>>> Stashed changes
 		});
 
 		Route::get('me', function (Request $request) {
 			return response()->json((new UserResource($request->user()))->resolve($request));
 		});
 		Route::get('monitor/nextcloud', [MonitorController::class, 'status']);
-<<<<<<< Updated upstream
-=======
-		// Team endpoints
->>>>>>> Stashed changes
 		Route::apiResource('teams', TeamController::class);
 		Route::post('team-invitations/accept', [TeamInvitationController::class, 'accept'])->middleware('throttle:10,1');
 		Route::get('teams/{team}/invitations', [TeamInvitationController::class, 'index']);
@@ -73,10 +66,6 @@ Route::prefix('v1')->group(function () {
 		Route::post('teams/{team}/transfer-ownership', [TeamMemberController::class, 'transferOwnership']);
 		Route::patch('teams/{team}/members/{user}', [TeamMemberController::class, 'update']);
 		Route::delete('teams/{team}/members/{user}', [TeamMemberController::class, 'destroy']);
-<<<<<<< Updated upstream
-=======
-		// Workspace endpoints
->>>>>>> Stashed changes
 		Route::apiResource('workspaces', WorkspaceController::class);
 	});
 });
