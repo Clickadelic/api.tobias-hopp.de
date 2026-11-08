@@ -27,13 +27,18 @@ class DatabaseSeeder extends Seeder
         $admin = User::updateOrCreate(
             ['email' => 'batman@clickadelic.de'],
             [
-                'id' => Str::uuid(),
                 'name' => 'Batman',
                 'email_verified_at' => now(),
                 'password' => 'forello204$',
                 'remember_token' => Str::random(10),
             ]
         );
+
+        // Only set ID on first creation to avoid foreign key constraint violations
+        if ($admin->wasRecentlyCreated) {
+            $admin->id = Str::uuid();
+            $admin->save();
+        }
 
         $admin->assignRole('admin');
     }
