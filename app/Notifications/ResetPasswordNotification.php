@@ -16,6 +16,10 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
 	public function __construct(string $token)
 	{
 		$this->token = $token;
+		// Don't queue in local environment for testing
+		if (config('app.env') === 'local') {
+			$this->queue = null;
+		}
 	}
 
 	public function via(object $notifiable): array
