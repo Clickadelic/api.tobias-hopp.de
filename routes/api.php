@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function () {
 	Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 		Route::middleware('role:admin')->group(function () {
 			Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
+			Route::post('users', [AdminUserController::class, 'store']);
 			Route::get('users', [AdminUserController::class, 'index']);
 			Route::patch('users/{user}/role', [AdminUserController::class, 'updateRole']);
 			Route::delete('users/{user}', [AdminUserController::class, 'destroy']);

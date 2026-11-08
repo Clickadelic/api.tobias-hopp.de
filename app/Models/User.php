@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,66 +13,67 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-	/** @use HasFactory<\Database\Factories\UserFactory> */
-	use HasFactory, Notifiable, HasApiTokens, HasUuids, HasRoles;
+    /** @use HasFactory<UserFactory> */
+    use HasApiTokens, HasFactory, HasRoles, HasUuids, Notifiable;
 
-	public $incrementing = false;
-	protected $keyType = 'string';
-	protected string $guard_name = 'web';
+    public $incrementing = false;
 
-	/**
-	 * The attributes that are mass assignable.
-	 *
-	 * @var list<string>
-	 */
-	protected $fillable = [
-		'name',
-		'email',
-		'password',
-	];
+    protected $keyType = 'string';
 
-	/**
-	 * The attributes that should be hidden for serialization.
-	 *
-	 * @var list<string>
-	 */
-	protected $hidden = [
-		'password',
-		'remember_token',
-	];
+    protected string $guard_name = 'web';
 
-	public function teams(): BelongsToMany
-	{
-		return $this->belongsToMany(Team::class)->withPivot('role')->withTimestamps();
-	}
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
 
-	/**
-	 * Send a password reset notification to the user.
-	 */
-	public function sendPasswordResetNotification($token): void
-	{
-		$this->notify(new ResetPasswordNotification($token));
-	}
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-	/**
-	 * Get the attributes that should be cast.
-	 *
-	 * @return array<string, string>
-	 */
-	protected function casts(): array
-	{
-		return [
-			'email_verified_at' => 'datetime',
-			'password' => 'hashed',
-		];
-	}
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class)->withPivot('role')->withTimestamps();
+    }
 
-	public function profileImage(): MorphOne
-	{
-		return $this->morphOne(Media::class, 'mediable');
-	}
+    /**
+     * Send a password reset notification to the user.
+     */
+    public function sendPasswordResetNotification($token, $appUrl = null): void
+    {
+        $this->notify(new ResetPasswordNotification($token, $appUrl));
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    public function profileImage(): MorphOne
+    {
+        return $this->morphOne(Media::class, 'mediable');
+    }
 }
