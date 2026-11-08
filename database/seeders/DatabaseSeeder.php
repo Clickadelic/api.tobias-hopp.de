@@ -27,7 +27,6 @@ class DatabaseSeeder extends Seeder
         $admin = User::updateOrCreate(
             ['email' => 'batman@clickadelic.de'],
             [
-                'id' => Str::uuid(),
                 'name' => 'Batman',
                 'email_verified_at' => now(),
                 'password' => 'forello204$',
