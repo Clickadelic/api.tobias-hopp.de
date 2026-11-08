@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BackgroundImageController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ContactSubmissionController;
 use App\Http\Controllers\Api\MonitorController;
 use App\Http\Controllers\Api\TeamController;
@@ -50,9 +51,14 @@ Route::prefix('v1')->group(function () {
 	Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 		Route::middleware('role:admin')->group(function () {
 			Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
+			Route::post('users', [AdminUserController::class, 'store']);
 			Route::get('users', [AdminUserController::class, 'index']);
 			Route::patch('users/{user}/role', [AdminUserController::class, 'updateRole']);
 			Route::delete('users/{user}', [AdminUserController::class, 'destroy']);
+		});
+
+		Route::middleware('role:admin')->group(function () {
+			Route::apiResource('categories', CategoryController::class);
 		});
 
 		Route::get('me', function (Request $request) {
