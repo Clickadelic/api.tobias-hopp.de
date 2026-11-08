@@ -33,15 +33,9 @@ class CategoryController extends Controller
 
 	public function store(StoreCategoryRequest $request)
 	{
-		Category::create($request->validated());
+		$category = Category::create($request->validated());
 
-		$perPage = min(max((int) $request->query('per_page', 10), 1), 50);
-		$categories = Category::query()
-			->latest()
-			->paginate($perPage)
-			->withQueryString();
-
-		return response()->json($categories, 201);
+		return response()->json($category, 201);
 	}
 
 	public function update(UpdateCategoryRequest $request, Category $category)
@@ -58,3 +52,4 @@ class CategoryController extends Controller
 		return response()->json(null, 204);
 	}
 }
+
