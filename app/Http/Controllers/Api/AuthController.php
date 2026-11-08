@@ -162,7 +162,10 @@ class AuthController extends Controller
 			required: true,
 			content: new OA\JsonContent(
 				required: ["email"],
-				properties: [new OA\Property(property: "email", type: "string", format: "email", example: "jane@example.com")]
+				properties: [
+					new OA\Property(property: "email", type: "string", format: "email", example: "jane@example.com"),
+					new OA\Property(property: "app_url", type: "string", format: "url", example: "https://dashboard.tobias-hopp.de", description: "Optional: redirect URL for password reset page"),
+				]
 			)
 		),
 		responses: [
@@ -172,7 +175,23 @@ class AuthController extends Controller
 	)]
 	public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
 	{
-		Password::sendResetLink($request->validated());
+		$validated = $request->validated();
+		$appUrl = $validated['app_url'] ?? config('app.frontend_url');
+
+		Log::debug('Password reset requested', [
+			'email' => $validated['email'],
+			'app_url' => $appUrl,
+			'validated_app_url' => $validated['app_url'] ?? null,
+			'config_frontend_url' => config('app.frontend_url'),
+		]);
+
+		// Find user and send reset notification
+		$user = User::where('email', $validated['email'])->first();
+
+		if ($user) {
+			$token = Password::broker()->createToken($user);
+			$user->notify(new \App\Notifications\ResetPasswordNotification($token, $appUrl));
+		}
 
 		return response()->json([
 			'message' => 'If an account exists for that email address, a password reset link has been sent.',
