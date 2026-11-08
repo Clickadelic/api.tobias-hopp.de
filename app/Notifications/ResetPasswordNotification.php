@@ -12,10 +12,13 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
 	use Queueable;
 
 	public string $token;
+	public string $appUrl;
 
-	public function __construct(string $token)
+	public function __construct(string $token, string $appUrl = null)
 	{
 		$this->token = $token;
+		$this->appUrl = $appUrl ?? config('app.frontend_url', 'http://localhost:5173');
+		
 		// Don't queue in local environment for testing
 		if (config('app.env') === 'local') {
 			$this->queue = null;
@@ -29,8 +32,7 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
 
 	public function toMail(object $notifiable): MailMessage
 	{
-		$dashboardUrl = config('app.frontend_url', 'http://localhost:5173');
-		$resetUrl = $dashboardUrl . '/auth/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->email);
+		$resetUrl = $this->appUrl . '/auth/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->email);
 
 		return (new MailMessage)
 			->subject('Passwort zurücksetzen')
