@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ForgotPasswordRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
@@ -216,5 +217,45 @@ class AuthController extends Controller
 		return response()->json([
 			'message' => 'Logged out from all devices successfully',
 		]);
+	}
+
+	#[OA\Post(
+		path: "/api/auth/reset-password",
+		summary: "Reset password using a valid token",
+		tags: ["User"],
+		requestBody: new OA\RequestBody(
+			required: true,
+			content: new OA\JsonContent(
+				required: ["email", "token", "password", "password_confirmation"],
+				properties: [
+					new OA\Property(property: "email", type: "string", format: "email", example: "jane@example.com"),
+					new OA\Property(property: "token", type: "string"),
+					new OA\Property(property: "password", type: "string", format: "password", minLength: 8),
+					new OA\Property(property: "password_confirmation", type: "string", format: "password"),
+				]
+			)
+		),
+		responses: [
+			new OA\Response(response: 200, description: "Password reset successfully", content: new OA\JsonContent(ref: "#/components/schemas/Message")),
+			new OA\Response(response: 422, description: "Validation error or invalid token", content: new OA\JsonContent(ref: "#/components/schemas/ValidationError")),
+		]
+	)]
+	public function resetPassword(ResetPasswordRequest $request): JsonResponse
+	{
+		$status = Password::reset($request->validated(), function (User $user, string $password) {
+			$user->forceFill([
+				'password' => Hash::make($password),
+			])->save();
+		});
+
+		if ($status === Password::PASSWORD_RESET) {
+			return response()->json([
+				'message' => 'Password reset successfully. You can now login with your new password.',
+			]);
+		}
+
+		return response()->json([
+			'message' => 'The password reset token is invalid or has expired.',
+		], 422);
 	}
 }

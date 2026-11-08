@@ -34,6 +34,12 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Only set ID on first creation to avoid foreign key constraint violations
+        if ($admin->wasRecentlyCreated) {
+            $admin->id = Str::uuid();
+            $admin->save();
+        }
+
         $admin->assignRole('admin');
     }
 }

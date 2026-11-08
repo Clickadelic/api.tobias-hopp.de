@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -45,6 +46,14 @@ class User extends Authenticatable implements MustVerifyEmail
 	public function teams(): BelongsToMany
 	{
 		return $this->belongsToMany(Team::class)->withPivot('role')->withTimestamps();
+	}
+
+	/**
+	 * Send a password reset notification to the user.
+	 */
+	public function sendPasswordResetNotification($token): void
+	{
+		$this->notify(new ResetPasswordNotification($token));
 	}
 
 	/**
