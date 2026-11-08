@@ -178,14 +178,19 @@ class AuthController extends Controller
 		$validated = $request->validated();
 		$appUrl = $validated['app_url'] ?? config('app.frontend_url');
 
-		// Manually send reset link with custom callback to pass app_url
+		Log::debug('Password reset requested', [
+			'email' => $validated['email'],
+			'app_url' => $appUrl,
+			'validated_app_url' => $validated['app_url'] ?? null,
+			'config_frontend_url' => config('app.frontend_url'),
+		]);
+
+		// Find user and send reset notification
 		$user = User::where('email', $validated['email'])->first();
 
 		if ($user) {
-			$user->notify(new \App\Notifications\ResetPasswordNotification(
-				Password::broker()->createToken($user),
-				$appUrl
-			));
+			$token = Password::broker()->createToken($user);
+			$user->notify(new \App\Notifications\ResetPasswordNotification($token, $appUrl));
 		}
 
 		return response()->json([
