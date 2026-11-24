@@ -99,3 +99,29 @@ it('allows admins to view contact submissions', function () {
         ->getJson('/api/v1/contact-submissions')
         ->assertOk();
 });
+
+it('allows admins to delete a contact submission', function () {
+    Role::create(['name' => 'admin', 'guard_name' => 'web']);
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $submission = ContactSubmission::factory()->create();
+
+    $this->actingAs($admin, 'sanctum')
+        ->deleteJson("/api/v1/contact-submissions/{$submission->uuid}")
+        ->assertOk();
+
+    expect(ContactSubmission::query()->whereKey($submission->getKey())->exists())->toBeFalse();
+});
+
+it('rejects regular users from deleting a contact submission', function () {
+    Role::create(['name' => 'user', 'guard_name' => 'web']);
+    $regularUser = User::factory()->create();
+    $regularUser->assignRole('user');
+    $submission = ContactSubmission::factory()->create();
+
+    $this->actingAs($regularUser, 'sanctum')
+        ->deleteJson("/api/v1/contact-submissions/{$submission->uuid}")
+        ->assertForbidden();
+
+    expect(ContactSubmission::query()->whereKey($submission->getKey())->exists())->toBeTrue();
+});
