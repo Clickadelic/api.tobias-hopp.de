@@ -63,9 +63,10 @@ Route::prefix('v1')->group(function () {
 		Route::apiResource('teams', TeamController::class)->except(['show']);
 		Route::get('teams/{team:slug}', [TeamController::class, 'show']);
 
-		Route::get('teams/{team}/invitations', [TeamInvitationController::class, 'index']);
-		Route::post('teams/{team}/invitations', [TeamInvitationController::class, 'store'])->middleware('throttle:20,1');
-		Route::delete('teams/{team}/invitations/{invitation}', [TeamInvitationController::class, 'destroy']);
+		// Route::get('teams/{team}/invitations', [TeamInvitationController::class, 'index']);
+		Route::get('teams/{team:slug}/invitations', [TeamInvitationController::class, 'index']);
+		Route::post('teams/{team:slug}/invitations', [TeamInvitationController::class, 'store'])->middleware('throttle:20,1');
+		Route::delete('teams/{team:slug}/invitations/{invitation}', [TeamInvitationController::class, 'destroy']);
 
 		Route::post('teams/{team}/transfer-ownership', [TeamMemberController::class, 'transferOwnership']);
 		Route::patch('teams/{team}/members/{user}', [TeamMemberController::class, 'update']);

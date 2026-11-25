@@ -18,12 +18,24 @@ class TeamInvitationController extends Controller
 {
 	private const EXPIRES_IN_DAYS = 7;
 
+	// public function index(Team $team)
+	// {
+	// 	Gate::authorize('manageMembers', $team);
+
+	// 	return response()->json(
+	// 		$team->invitations()->where('expires_at', '>', now())->latest()->get()
+	// 	);
+	// }
+
 	public function index(Team $team)
 	{
 		Gate::authorize('manageMembers', $team);
 
 		return response()->json(
-			$team->invitations()->where('expires_at', '>', now())->latest()->get()
+			$team->invitations()
+				->where('expires_at', '>', now())
+				->latest()
+				->get()
 		);
 	}
 
