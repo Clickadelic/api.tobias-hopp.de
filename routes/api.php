@@ -40,39 +40,54 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
-	Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
-	Route::post('contact-submissions', [ContactSubmissionController::class, 'store']);
+
+	// Public
+	Route::post('contact-submissions', [ContactSubmissionController::class, 'store'])
+		->middleware('throttle:10,1');
 
 	Route::middleware('throttle:60,1')->group(function () {
 		Route::get('unsplash/image/general', [BackgroundImageController::class, 'general']);
 		Route::get('unsplash/image/seasonal', [BackgroundImageController::class, 'seasonal']);
 	});
 
+	// Authenticated
 	Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+
+		Route::get('me', function (Request $request) {
+			return response()->json((new UserResource($request->user()))->resolve($request));
+		});
+
+		Route::get('monitor/nextcloud', [MonitorController::class, 'status']);
+
+		// Teams
+		Route::apiResource('teams', TeamController::class)->except(['show']);
+		Route::get('teams/{team:slug}', [TeamController::class, 'show']);
+
+		Route::get('teams/{team}/invitations', [TeamInvitationController::class, 'index']);
+		Route::post('teams/{team}/invitations', [TeamInvitationController::class, 'store'])->middleware('throttle:20,1');
+		Route::delete('teams/{team}/invitations/{invitation}', [TeamInvitationController::class, 'destroy']);
+
+		Route::post('teams/{team}/transfer-ownership', [TeamMemberController::class, 'transferOwnership']);
+		Route::patch('teams/{team}/members/{user}', [TeamMemberController::class, 'update']);
+		Route::delete('teams/{team}/members/{user}', [TeamMemberController::class, 'destroy']);
+
+		Route::post('team-invitations/accept', [TeamInvitationController::class, 'accept'])
+			->middleware('throttle:10,1');
+
+		// Workspaces
+		Route::apiResource('workspaces', WorkspaceController::class);
+
+		// Admin
 		Route::middleware('role:admin')->group(function () {
-			Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
+			Route::apiResource('contact-submissions', ContactSubmissionController::class)
+				->except(['store']);
+
+			Route::apiResource('categories', CategoryController::class);
+
 			Route::post('users', [AdminUserController::class, 'store']);
 			Route::get('users', [AdminUserController::class, 'index']);
 			Route::patch('users/{user}/role', [AdminUserController::class, 'updateRole']);
 			Route::delete('users/{user}', [AdminUserController::class, 'destroy']);
 		});
-
-		Route::middleware('role:admin')->group(function () {
-			Route::apiResource('categories', CategoryController::class);
-		});
-
-		Route::get('me', function (Request $request) {
-			return response()->json((new UserResource($request->user()))->resolve($request));
-		});
-		Route::get('monitor/nextcloud', [MonitorController::class, 'status']);
-		Route::apiResource('teams', TeamController::class);
-		Route::post('team-invitations/accept', [TeamInvitationController::class, 'accept'])->middleware('throttle:10,1');
-		Route::get('teams/{team}/invitations', [TeamInvitationController::class, 'index']);
-		Route::post('teams/{team}/invitations', [TeamInvitationController::class, 'store'])->middleware('throttle:20,1');
-		Route::delete('teams/{team}/invitations/{invitation}', [TeamInvitationController::class, 'destroy']);
-		Route::post('teams/{team}/transfer-ownership', [TeamMemberController::class, 'transferOwnership']);
-		Route::patch('teams/{team}/members/{user}', [TeamMemberController::class, 'update']);
-		Route::delete('teams/{team}/members/{user}', [TeamMemberController::class, 'destroy']);
-		Route::apiResource('workspaces', WorkspaceController::class);
 	});
 });
