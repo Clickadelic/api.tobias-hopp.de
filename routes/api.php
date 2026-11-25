@@ -41,7 +41,7 @@ Route::prefix('auth')->group(function () {
 
 Route::prefix('v1')->group(function () {
 	Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
-	Route::post('contact-submission', [ContactSubmissionController::class, 'store']);
+	Route::post('contact-submissions', [ContactSubmissionController::class, 'store']);
 
 	Route::middleware('throttle:60,1')->group(function () {
 		Route::get('unsplash/image/general', [BackgroundImageController::class, 'general']);
