@@ -40,8 +40,13 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
+<<<<<<< HEAD
 	// Contact Submissions
 	Route::post('contact-submission', [ContactSubmissionController::class, 'store']);
+=======
+	Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
+	Route::post('contact-submissions', [ContactSubmissionController::class, 'store']);
+>>>>>>> 52c66d53a61884dec721d8dbc5bd5b51543aec15
 
 	// Unsplash images
 	Route::middleware('throttle:60,1')->group(function () {
