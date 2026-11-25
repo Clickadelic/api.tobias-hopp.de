@@ -40,16 +40,19 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
-	Route::apiResource('contact-submissions', ContactSubmissionController::class)->only(['store']);
+	// Contact Submissions
 	Route::post('contact-submission', [ContactSubmissionController::class, 'store']);
 
+	// Unsplash images
 	Route::middleware('throttle:60,1')->group(function () {
 		Route::get('unsplash/image/general', [BackgroundImageController::class, 'general']);
 		Route::get('unsplash/image/seasonal', [BackgroundImageController::class, 'seasonal']);
 	});
 
+	// Authenticated and verified routes
 	Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 		Route::middleware('role:admin')->group(function () {
+			// Admin-only routes for managing contact submissions and users
 			Route::apiResource('contact-submissions', ContactSubmissionController::class)->except(['store']);
 			Route::post('users', [AdminUserController::class, 'store']);
 			Route::get('users', [AdminUserController::class, 'index']);
@@ -57,22 +60,32 @@ Route::prefix('v1')->group(function () {
 			Route::delete('users/{user}', [AdminUserController::class, 'destroy']);
 		});
 
+		// Admin-only routes for managing categories
 		Route::middleware('role:admin')->group(function () {
 			Route::apiResource('categories', CategoryController::class);
 		});
 
+		// User profile -> self
 		Route::get('me', function (Request $request) {
 			return response()->json((new UserResource($request->user()))->resolve($request));
 		});
+
+		// NextCloud Monitor
 		Route::get('monitor/nextcloud', [MonitorController::class, 'status']);
-		Route::apiResource('teams', TeamController::class);
-		Route::post('team-invitations/accept', [TeamInvitationController::class, 'accept'])->middleware('throttle:10,1');
+
+		// Teams management
+		Route::apiResource('teams', TeamController::class)->except(['show']);
+		// Überschreibt apiResource für das Anzeigen eines Teams nach Slug
+		Route::get('teams/{team:slug}', [TeamController::class, 'show']);
+		// Invitations for a team
 		Route::get('teams/{team}/invitations', [TeamInvitationController::class, 'index']);
 		Route::post('teams/{team}/invitations', [TeamInvitationController::class, 'store'])->middleware('throttle:20,1');
 		Route::delete('teams/{team}/invitations/{invitation}', [TeamInvitationController::class, 'destroy']);
 		Route::post('teams/{team}/transfer-ownership', [TeamMemberController::class, 'transferOwnership']);
 		Route::patch('teams/{team}/members/{user}', [TeamMemberController::class, 'update']);
 		Route::delete('teams/{team}/members/{user}', [TeamMemberController::class, 'destroy']);
+		// Accept invitation for a team invitation
+		Route::post('team-invitations/accept', [TeamInvitationController::class, 'accept'])->middleware('throttle:10,1');
 		Route::apiResource('workspaces', WorkspaceController::class);
 	});
 });
